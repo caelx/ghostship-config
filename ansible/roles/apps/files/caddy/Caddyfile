@@ -1,0 +1,20 @@
+{
+    email {{ caddy_email }}
+    acme_dns cloudflare {{ caddy_cloudflare_api_token }}
+}
+
+{{ apps_domain }} {
+    reverse_proxy {{ organizr_container_name }}:{{ organizr_port }}
+}
+
+{{ openwebui_hostname }} {
+    reverse_proxy {{ openwebui_container_name }}:8080
+}
+
+{{ ollama_hostname }} {
+    reverse_proxy host.docker.internal:11434
+}
+
+{{ plex_hostname }} {
+    reverse_proxy host.docker.internal:32400
+}

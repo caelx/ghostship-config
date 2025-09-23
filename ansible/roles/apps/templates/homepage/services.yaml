@@ -1,0 +1,33 @@
+---
+- Caddy:
+    - Caddy:
+        icon: caddy.png
+        href: https://{{ caddy_domain }}
+        description: Web server and reverse proxy
+        widget:
+            type: docker
+            url: unix:///var/run/docker.sock
+            label: Caddy
+- OpenWebUI:
+    - OpenWebUI:
+        icon: openwebui.png
+        href: http://{{ openwebui_container_name }}:{{ openwebui_port }}
+        description: Web UI for Ollama
+        widget:
+            type: docker
+            url: unix:///var/run/docker.sock
+            label: OpenWebUI
+- Ollama:
+    - Ollama:
+        icon: ollama.png
+        href: http://{{ ollama_host }}:11434
+        description: Large language model server
+- Plex:
+    - Plex:
+        icon: plex.png
+        href: http://{{ plex_host }}:32400/web
+        description: Media server
+        widget:
+            type: plex
+            url: http://{{ plex_host }}:32400
+            key: "{{ plex_token }}"

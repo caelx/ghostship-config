@@ -1,0 +1,9 @@
+---
+nfs_server_ip: "192.168.1.100" # Replace with your NFS server IP
+nfs_remote_path: "/mnt/nfs_share" # Replace with the remote NFS share path
+nfs_local_mount_point: "/Volumes/NFSShare" # Local mount point on Mac Studio
+
+apps_user: apps
+apps_uid: 1000
+apps_group: apps
+apps_gid: 1000

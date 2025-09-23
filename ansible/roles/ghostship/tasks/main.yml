@@ -1,0 +1,189 @@
+---
+
+- name: Configure SSH daemon for key-based authentication only
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+  notify: Restart sshd
+
+- name: Disable ChallengeResponseAuthentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^ChallengeResponseAuthentication'
+    line: 'ChallengeResponseAuthentication no'
+    state: present
+  notify: Restart sshd
+
+- name: Create 'apps' group and user
+  ansible.builtin.shell: |
+    sudo dscl . -create /Groups/{{ apps_group }}
+    sudo dscl . -create /Groups/{{ apps_group }} PrimaryGroupID {{ apps_gid }}
+    sudo dscl . -create /Users/{{ apps_user_name }}
+    sudo dscl . -create /Users/{{ apps_user_name }} UserShell /usr/bin/false
+    sudo dscl . -create /Users/{{ apps_user_name }} RealName "Apps User"
+    sudo dscl . -create /Users/{{ apps_user_name }} UniqueID "{{ apps_user_uid }}"
+    sudo dscl . -create /Users/{{ apps_user_name }} PrimaryGroupID {{ apps_user_gid }}
+    sudo dscl . -create /Users/{{ apps_user_name }} NFSHomeDirectory /Users/{{ apps_user_name }}
+
+    sudo createhomedir -c -u {{ apps_user_name }}
+  args:
+    creates: /Users/{{ apps_user_name }}
+  # The 'creates' argument makes this task idempotent for user creation.
+
+- name: Add 'apps' user to 'docker' group (if group exists)
+  ansible.builtin.shell: dscl . -append /Groups/docker GroupMembership {{ apps_user_name }}
+  args:
+    warn: false # Suppress warning if group doesn't exist yet
+  changed_when: false # This command doesn't reliably report changes
+  ignore_errors: yes # Continue if docker group doesn't exist yet
+
+- name: Create local mount point for NFS share
+  ansible.builtin.file:
+    path: "{{ nfs_local_mount_point }}"
+    state: directory
+    mode: '0755'
+    owner: ansible
+    group: staff
+
+- name: Add NFS mount to /etc/fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: "{{ nfs_server_ip }}:{{ nfs_remote_path }} {{ nfs_local_mount_point }} nfs rw,net,auto,uid={{ apps_uid }},gid={{ apps_gid }} 0 0"
+    create: yes
+    state: present
+    regexp: "^{{ nfs_server_ip }}:{{ nfs_remote_path }}"
+
+- name: Mount NFS share
+  ansible.builtin.command: mount "{{ nfs_local_mount_point }}"
+  args:
+    creates: "{{ nfs_local_mount_point }}/.ansible_mounted_check"
+  # The 'creates' argument is a simple way to make this task idempotent for initial mount.
+  # For subsequent runs, if already mounted, it won't try to mount again.
+
+- name: Update Homebrew
+  ansible.builtin.shell: brew update
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Upgrade Homebrew packages
+  ansible.builtin.shell: brew upgrade
+  args:
+    executable: /bin/bash
+  changed_when: false
+
+- name: Apply macOS software updates
+  ansible.builtin.shell: softwareupdate -iaR
+  args:
+    executable: /bin/bash
+  changed_when: false
+  # This command will install all available updates and restart if necessary.
+  # The 'changed_when: false' is used because softwareupdate's exit code doesn't reliably indicate changes.
+
+- name: Enable macOS Application Firewall
+  ansible.builtin.shell: /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+  changed_when: false # This command doesn't always report changes reliably
+
+- name: Block all incoming connections by default on macOS firewall
+  ansible.builtin.shell: /usr/libexec/ApplicationFirewall/socketfilterfw --setblockall on
+  changed_when: false
+
+- name: Allow incoming SSH connections on macOS firewall
+  ansible.builtin.shell: /usr/libexec/ApplicationFirewall/socketfilterfw --unblockapp /usr/sbin/sshd
+  changed_when: false
+
+- name: Enable automatic macOS updates
+  community.general.osx_defaults:
+    domain: com.apple.SoftwareUpdate
+    key: AutomaticCheckEnabled
+    type: bool
+    value: true
+
+- name: Enable automatic app updates
+  community.general.osx_defaults:
+    domain: com.apple.SoftwareUpdate
+    key: AutomaticAppUpdatesEnabled
+    type: bool
+    value: true
+
+- name: Enable automatic security updates
+  community.general.osx_defaults:
+    domain: com.apple.SoftwareUpdate
+    key: CriticalUpdateInstall
+    type: bool
+    value: true
+
+- name: Disable system sleep
+  community.general.osx_defaults:
+    domain: com.apple.PowerManagement
+    key: SystemSleepPolicy
+    type: dict
+    value: '{ "AC Power" = 0; "Battery Power" = 0; }'
+  # This is a simplified approach. A more robust solution might involve `pmset`.
+
+- name: Disable display sleep
+  community.general.osx_defaults:
+    domain: com.apple.PowerManagement
+    key: DisplaySleepPolicy
+    type: dict
+    value: '{ "AC Power" = 0; "Battery Power" = 0; }'
+
+- name: Disable hard disk sleep
+  community.general.osx_defaults:
+    domain: com.apple.PowerManagement
+    key: DiskSleepPolicy
+    type: dict
+    value: '{ "AC Power" = 0; "Battery Power" = 0; }'
+
+- name: Install Docker Desktop via Homebrew
+  community.general.homebrew_cask:
+    name: docker
+    state: present
+
+- name: Configure Docker Desktop to launch on login
+  community.general.osx_defaults:
+    domain: com.docker.docker
+    key: LaunchAtLogin
+    type: bool
+    value: true
+
+- name: Ensure Docker Desktop is running
+  ansible.builtin.shell: pgrep "Docker" || open -a "Docker"
+  args:
+    executable: /bin/bash
+  changed_when: false
+  # This task attempts to ensure Docker Desktop is running.
+  # It checks for the Docker process and tries to open the application if not found.
+  # Note: In a truly headless environment, 'open -a' might require a login session.
+
+- name: Disable Guest User
+  ansible.builtin.shell: dscl . -delete /Users/Guest
+  ignore_errors: yes # Guest user might not exist or already be disabled
+
+- name: Disable Guest Login in Login Window
+  ansible.builtin.shell: defaults write /Library/Preferences/com.apple.loginwindow GuestEnabled -bool NO
+  changed_when: false
+
+- name: Disable Remote Apple Events
+  community.general.osx_defaults:
+    domain: com.apple.RemoteDesktop
+    key: ARD_Enabled
+    type: bool
+    value: false
+
+- name: Disable Screen Sharing
+  community.general.osx_defaults:
+    domain: com.apple.ScreenSharing
+    key: ScreenSharing
+    type: bool
+    value: false
+
+- name: Disable Remote Login (SSH) for root
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+    state: present
+  notify: Restart sshd

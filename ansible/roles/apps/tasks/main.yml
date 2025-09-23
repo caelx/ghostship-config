@@ -1,0 +1,101 @@
+---
+- name: Create Caddy configuration directory
+  ansible.builtin.file:
+    path: /etc/caddy
+    state: directory
+    mode: '0755'
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+
+- name: Copy Caddyfile
+  ansible.builtin.copy:
+    src: caddy/Caddyfile
+    dest: /etc/caddy/Caddyfile
+    mode: '0644'
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+
+- name: Ensure Caddy container is running
+  community.docker.docker_container:
+    name: "{{ caddy_container_name }}"
+    image: "{{ caddy_image }}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    env:
+      CLOUDFLARE_API_TOKEN: "{{ caddy_cloudflare_api_token }}"
+    restart_policy: unless-stopped
+    state: started
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+
+- name: Ensure OpenWebUI container is running
+  community.docker.docker_container:
+    name: "{{ openwebui_container_name }}"
+    image: "{{ openwebui_image }}"
+    ports:
+      - "{{ openwebui_port }}:8080"
+    env:
+      OLLAMA_BASE_URL: "http://{{ ollama_host }}:11434"
+    restart_policy: unless-stopped
+    state: started
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+
+- name: Create Homepage configuration directory
+  ansible.builtin.file:
+    path: /var/lib/homepage
+    state: directory
+    mode: '0755'
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+
+- name: Ensure Homepage container is running
+  community.docker.docker_container:
+    name: "{{ homepage_container_name }}"
+    image: "{{ homepage_image }}"
+    ports:
+      - "{{ homepage_port }}:3000"
+    volumes:
+      - /var/lib/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart_policy: unless-stopped
+    state: started
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+
+- name: Copy Homepage services configuration
+  ansible.builtin.template:
+    src: homepage/services.yaml
+    dest: /var/lib/homepage/services.yaml
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+    mode: '0644'
+
+- name: Copy Homepage bookmarks configuration
+  ansible.builtin.template:
+    src: homepage/bookmarks.yaml
+    dest: /var/lib/homepage/bookmarks.yaml
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+    mode: '0644'
+
+- name: Create Organizr configuration directory
+  ansible.builtin.file:
+    path: /var/lib/organizr
+    state: directory
+    mode: '0755'
+    owner: "{{ apps_user }}"
+    group: "{{ apps_group }}"
+
+- name: Ensure Organizr container is running
+  community.docker.docker_container:
+    name: "{{ organizr_container_name }}"
+    image: "{{ organizr_image }}"
+    ports:
+      - "{{ organizr_port }}:80"
+    volumes:
+      - /var/lib/organizr:/config
+    restart_policy: unless-stopped
+    state: started
+    user: "{{ apps_uid }}:{{ apps_gid }}"

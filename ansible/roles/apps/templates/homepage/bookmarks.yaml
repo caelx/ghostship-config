@@ -1,0 +1,8 @@
+---
+- Home:
+    - Google:
+        icon: google.png
+        href: https://www.google.com
+    - GitHub:
+        icon: github.png
+        href: https://github.com

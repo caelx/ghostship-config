@@ -1,0 +1,4 @@
+---
+plex_data_dir: "/Volumes/PlexData/Library/Application Support/Plex Media Server"
+plex_user: "{{ apps_user }}"
+plex_group: "{{ apps_group }}"

@@ -1,0 +1,9 @@
+---
+- name: Configure Mac Studio as Headless Server
+  hosts: mac_studio
+  become: yes
+  roles:
+    - ghostship
+    - plex
+    - ollama
+    - apps

@@ -1,0 +1,41 @@
+---
+- name: Install Ollama via Homebrew
+  community.general.homebrew_cask:
+    name: ollama
+    state: present
+
+- name: Ensure Ollama service is stopped before modifying plist
+  ansible.builtin.command: launchctl unload ~/Library/LaunchAgents/homebrew.mxcl.ollama.plist
+  args:
+    removes: ~/Library/LaunchAgents/homebrew.mxcl.ollama.plist
+  ignore_errors: yes
+  when: ansible_os_family == "Darwin"
+
+- name: Modify Ollama launchd plist to run as {{ apps_user }}
+  ansible.builtin.replace:
+    path: "/usr/local/opt/ollama/homebrew.mxcl.ollama.plist"
+    regexp: '(<key>ProgramArguments</key>\n\s*<array>)'
+    replace: '\1\n        <key>UserName</key>\n        <string>{{ apps_user }}</string>'
+  when: ansible_os_family == "Darwin"
+
+- name: Pull uncensored Llama 3 8B model (taozhiyuai/llama-3-8b-lexi-uncensored)
+  ansible.builtin.command: ollama pull taozhiyuai/llama-3-8b-lexi-uncensored
+  args:
+    creates: "/usr/local/bin/ollama"
+  # The 'creates' argument is a simple way to make this task idempotent for initial pull.
+  # For subsequent runs, if the model is already pulled, it won't try to pull again unless forced.
+  # Note: Ollama models are stored in ~/.ollama/models
+
+- name: Ensure Ollama service is running
+  ansible.builtin.service:
+    name: ollama
+    state: started
+    enabled: yes
+  # Ollama installs a launchd service that starts automatically.
+
+- name: Update Ollama models (pull latest version)
+  ansible.builtin.command: ollama pull taozhiyuai/llama-3-8b-lexi-uncensored
+  args:
+    executable: /usr/local/bin/ollama
+  changed_when: false
+  # This task will re-pull the model, ensuring it's up to date. changed_when: false prevents it from always reporting a change.

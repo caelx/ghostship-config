@@ -1,0 +1,3 @@
+---
+ollama_user: "{{ apps_user_name }}"
+ollama_group: "{{ apps_user_gid }}"

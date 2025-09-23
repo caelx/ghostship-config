@@ -15,3 +15,5 @@ Docker images should use the base name as the container name (example: caddy for
 All docker images that get added with a webui should be proxied through Caddy.  This means each docker image needs to be configured to use a lets encrypt certificate through Caddy.  Caddy should be configured to use cloudflare dns challenge to generate certificates and the certificates must automatically renew.  There should be a base domain and then each container will automatically use a subdomain on the base domain which will match the container name.
 
 The ansible account will be used to provision and manage the server.  All services should run using an apps service account which will be used to limit permissions for all installed apps.
+
+All services should be accessible through the Caddy image.  Each service should be linked to Organizr with an iframe.  Each service should have its widget (if it exists) configured in Homepage.

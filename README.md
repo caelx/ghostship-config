@@ -57,11 +57,26 @@ This section outlines the steps to install Asahi Linux on your Mac Studio in a h
     *   You will be prompted to set an administrator password for Asahi Linux.
 5.  **Configure Boot Policy (Permissive Mode):** The installer will likely guide you through this, but you will need to set the boot policy to "permissive mode" to allow Asahi Linux to boot. This typically involves restarting into macOS Recovery and adjusting security settings.
 6.  **First Boot into Asahi Linux:** After the installation completes and the boot policy is set, restart your Mac Studio. Ensure Asahi Linux is selected as the default boot option. It should now boot into Asahi Linux.
-7.  **Initial Network Configuration (SSH):**
+7.  **Initial Network Configuration (Wi-Fi and SSH):**
     *   Once Asahi Linux boots, you will likely need to connect a keyboard and monitor for the initial setup to configure networking.
-    *   Configure a static IP address or ensure DHCP is working.
-    *   Install and enable SSH server (e.g., `sudo dnf install openssh-server` and `sudo systemctl enable sshd --now` for Fedora).
-    *   Verify SSH access from another machine on your network.
+    *   **Enable Wi-Fi:**
+        1.  **Identify Wi-Fi device:** Run `nmcli device wifi list` to see available Wi-Fi networks and identify your Wi-Fi adapter (e.g., `wlan0`).
+        2.  **Connect to your network:** Use the following command, replacing `YOUR_SSID` with your Wi-Fi network name and `YOUR_PASSWORD` with its password:
+            ```bash
+            sudo nmcli device wifi connect YOUR_SSID password YOUR_PASSWORD
+            ```
+        3.  **Verify connection:** Run `nmcli device show wlan0` (replace `wlan0` with your device name) and check for an IP address. You can also `ping google.com` to test internet connectivity.
+    *   **Configure a static IP address (Optional, but recommended for homelab):**
+        *   If you prefer a static IP, you can configure it using `nmcli`. First, get the connection name: `nmcli connection show`. Then, modify it:
+            ```bash
+            sudo nmcli connection modify "Your_Connection_Name" ipv4.method manual ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns "8.8.8.8,8.8.4.4"
+            sudo nmcli connection up "Your_Connection_Name"
+            ```
+            Replace `"Your_Connection_Name"`, `192.168.1.100/24`, `192.168.1.1`, and DNS servers with your network's details.
+    *   **Install and enable SSH server:**
+        *   Install OpenSSH server: `sudo dnf install openssh-server`
+        *   Enable and start the SSH service: `sudo systemctl enable sshd --now`
+        *   Verify SSH access from another machine on your network using `ssh username@your_mac_studio_ip`.
 8.  **Enable Automatic Boot on Power Failure (Optional but Recommended for Homelab):**
     *   Once you have SSH access, you can configure the Mac Studio to automatically boot into Asahi Linux after a power failure. Execute the following command in Asahi Linux:
         ```bash

@@ -53,10 +53,10 @@ This section outlines the steps to install Asahi Linux on your Mac Studio in a h
     ```
 4.  **Follow On-Screen Prompts:**
     *   The installer will guide you through the process. When prompted, choose the **minimal or server installation option** (e.g., Fedora Asahi Remix Minimal or Server). Avoid installing a desktop environment if you intend to run headless.
-    *   Allocate a suitable amount of disk space for Asahi Linux. The installer will help you resize partitions if necessary.
+    *   **Allocate all or nearly all available disk space to Asahi Linux.** Since macOS will not be used after this installation, maximize the space for your Linux environment. The installer will handle the partitioning.
     *   You will be prompted to set an administrator password for Asahi Linux.
 5.  **Configure Boot Policy (Permissive Mode):** The installer will likely guide you through this, but you will need to set the boot policy to "permissive mode" to allow Asahi Linux to boot. This typically involves restarting into macOS Recovery and adjusting security settings.
-6.  **First Boot into Asahi Linux:** After the installation completes and the boot policy is set, restart your Mac Studio. It should now boot into Asahi Linux.
+6.  **First Boot into Asahi Linux:** After the installation completes and the boot policy is set, restart your Mac Studio. Ensure Asahi Linux is selected as the default boot option. It should now boot into Asahi Linux.
 7.  **Initial Network Configuration (SSH):**
     *   Once Asahi Linux boots, you will likely need to connect a keyboard and monitor for the initial setup to configure networking.
     *   Configure a static IP address or ensure DHCP is working.

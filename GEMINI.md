@@ -1,6 +1,6 @@
 # Gemini Instructions
 
-You are building out a homelab on a Mac Studio with an M1 Max Chip.  We will be using Ansible to do all the configuration and updating of services.  Services will either be running inside of Docker containers or natively on the Mac Studio.
+You are building out a homelab on a Mac Studio with an M1 Max Chip running Asahi Linux.  We will host everything headless with docker used to run all the containerized services.
 
 This project is meant to get a stock Mac Studio ready to act as a headless server that will host services.
 

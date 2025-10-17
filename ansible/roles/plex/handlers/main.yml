@@ -1,8 +1,0 @@
----
-- name: Restart Plex Media Server
-  ansible.builtin.shell: |
-    launchctl unload /Library/LaunchDaemons/com.plexapp.mediaserver.plist || true
-    launchctl load /Library/LaunchDaemons/com.plexapp.mediaserver.plist
-  args:
-    executable: /bin/bash
-  listen: "Restart Plex Media Server"

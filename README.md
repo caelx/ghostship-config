@@ -93,11 +93,12 @@ Once Asahi Linux is installed and you have SSH access, configure it for Ansible 
     ```bash
     ssh your_username@your_mac_studio_ip
     ```
-2.  **Create a dedicated Ansible user (non-interactive):**
-    *   Create the `ansible` user with a non-interactive shell and no password. This user will only be accessible via SSH keys.
+2.  **Create a dedicated Ansible user (non-interactive, no password):**
+    *   Create the `ansible` user with a predictable User ID (UID), a home directory, and a non-interactive shell. This user will only be accessible via SSH keys and will not have a password.
     ```bash
-    sudo useradd -m -s /sbin/nologin ansible
+    sudo useradd -m -u 1001 -s /sbin/nologin ansible
     ```
+    *   **Note:** If UID `1001` is already in use, choose another available UID (e.g., `1002`, `1003`, etc.).
 3.  **Grant Ansible user sudo privileges (NOPASSWD):**
     *   Create a new sudoers file for the Ansible user:
         ```bash

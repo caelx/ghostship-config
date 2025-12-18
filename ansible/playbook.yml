@@ -99,16 +99,6 @@
         group: "{{ apps_user }}"
         mode: '0755'
 
-    - name: Create app config directories
-      file:
-        path: "{{ config_dir }}/{{ item }}"
-        state: directory
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0755'
-      loop:
-        - organizr
-
     - name: Deploy .env file
       template:
         src: .env.j2

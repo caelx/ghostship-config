@@ -22,7 +22,7 @@ services:
       - fpm-user=apps
       - fpm-group=apps
     volumes:
-      - ./config/organizr:/config
+      - ${CONFIG_DIR}/organizr:/config
     networks:
       - ghostship_net
 

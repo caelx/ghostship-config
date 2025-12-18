@@ -1,0 +1,135 @@
+---
+- name: Setup Docker on Ghostship (chill_penguin Asahi Linux)
+  hosts: ghostship
+  become: true
+  vars:
+    apps_user: apps
+    cloudflared_token: "{{ lookup('env', 'CLOUDFLARED_TUNNEL_TOKEN') }}"
+    organizr_port: "{{ lookup('env', 'ORGANIZR_PORT') | default('8080', true) }}"
+    config_dir: "/opt/ghostship/config"
+    install_dir: "/opt/ghostship"
+
+  tasks:
+    - name: Ensure system is updated (including Asahi Linux specific packages)
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+
+    - name: Check if Cockpit service exists
+      ansible.builtin.stat:
+        path: /usr/lib/systemd/system/cockpit.socket
+      register: cockpit_service_file
+
+    - name: Stop and disable Cockpit service
+      systemd:
+        name: cockpit.socket
+        state: stopped
+        enabled: no
+      when: cockpit_service_file.stat.exists
+
+    - name: Remove Cockpit package
+      dnf:
+        name: cockpit
+        state: absent
+
+    - name: Install dnf-plugins-core
+      dnf:
+        name: dnf-plugins-core
+        state: present
+
+    - name: Download Docker CE repo file
+      get_url:
+        url: https://download.docker.com/linux/fedora/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        mode: '0644'
+
+    - name: Install Docker packages
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+
+    - name: Ensure Docker service is started and enabled
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create 'apps' service account
+      user:
+        name: "{{ apps_user }}"
+        shell: /sbin/nologin
+        create_home: yes
+        system: yes
+        password_lock: yes
+        groups: docker
+        append: no
+
+    - name: Add ansible user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Get 'apps' user info
+      getent:
+        database: passwd
+        key: "{{ apps_user }}"
+      register: apps_user_info
+
+    - name: Set apps_uid and apps_gid facts
+      set_fact:
+        apps_uid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][1] }}"
+        apps_gid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][2] }}"
+
+    - name: Create install directory
+      file:
+        path: "{{ install_dir }}"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0755'
+
+    - name: Create config directory
+      file:
+        path: "{{ config_dir }}"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0755'
+
+    - name: Deploy .env file
+      template:
+        src: .env.j2
+        dest: "{{ install_dir }}/.env"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0600'
+      notify: Restart Docker Compose
+
+    - name: Deploy docker-compose.yml
+      template:
+        src: docker-compose.yml.j2
+        dest: "{{ install_dir }}/docker-compose.yml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
+
+    - name: Ensure Docker Compose stack is running
+      shell: docker compose up -d
+      args:
+        chdir: "{{ install_dir }}"
+      register: docker_compose_output
+      changed_when: "docker_compose_output.stderr is search('Recreating|Created|Started')"
+
+  handlers:
+    - name: Restart Docker Compose
+      shell: docker compose down && docker compose up -d
+      args:
+        chdir: "{{ install_dir }}"

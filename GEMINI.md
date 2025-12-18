@@ -10,10 +10,8 @@ All docker services must be configured to autostart and restart on failure.  The
 
 All variables including the host ip address should be configured via environment variables.  These environment variables must be documented in `Readme.md`.
 
-Docker images should use the base name as the container name (example: caddy for the caddy image as the base name).  They should all be configured to automatically use the latest version of the software available.
-
-All docker images that get added with a webui should be proxied through Caddy.  This means each docker image needs to be configured to use a lets encrypt certificate through Caddy.  Caddy should be configured to use cloudflare dns challenge to generate certificates and the certificates must automatically renew.  There should be a base domain and then each container will automatically use a subdomain on the base domain which will match the container name.
+Docker images should use the base name as the container name.  They should all be configured to automatically use the latest version of the software available.
 
 The ansible account will be used to provision and manage the server.  All services should run using an apps service account which will be used to limit permissions for all installed apps.
 
-All services should be accessible through the Caddy image.  Each service should be linked to Organizr with an iframe.  Each service should have its widget (if it exists) configured in Homepage.
+All docker images should must use and have arm64 compatible images in order to be used.

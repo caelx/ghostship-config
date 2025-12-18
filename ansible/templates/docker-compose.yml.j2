@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: on-failure
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
+    networks:
+      - ghostship_net
+
+  organizr:
+    image: organizr/organizr:latest
+    container_name: organizr
+    restart: on-failure
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - fpm-user=apps
+      - fpm-group=apps
+    ports:
+      - "${ORGANIZR_PORT:-8080}:80"
+    volumes:
+      - ${CONFIG_DIR}/organizr:/config
+    networks:
+      - ghostship_net
+
+networks:
+  ghostship_net:
+    driver: bridge

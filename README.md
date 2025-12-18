@@ -142,9 +142,38 @@ Once Asahi Linux is installed and you have SSH access, configure it for Ansible 
 7.  **Ansible Inventory Setup (in this project):**
     *   Create an `inventory.ini` file in the root of this project (or a designated `ansible` directory) with the following content:
         ```ini
-        [mac_studio]
-        your_mac_studio_ip ansible_user=ansible ansible_ssh_private_key_file=~/.ssh/ansible_mac_studio_key
+        [ghostship]
+        chill_penguin ansible_host="{{ lookup('env', 'HOST_IP') }}" ansible_user="{{ lookup('env', 'ANSIBLE_USER') }}" ansible_password="{{ lookup('env', 'ANSIBLE_PASSWORD') }}" ansible_ssh_common_args='-o StrictHostKeyChecking=no'
         ```
     *   Replace `your_mac_studio_ip` with the actual IP address of your Mac Studio.
 
 Your Mac Studio is now configured to be managed by Ansible using SSH key-based authentication.
+
+## Running the Ansible Playbook for Docker
+
+This playbook installs and configures Docker on the Asahi Linux server. It also creates the `apps` service account and configures user permissions.
+
+### Prerequisites
+
+1.  Ensure you have completed the "Configure Asahi Linux for Ansible Management" section above.
+2.  Ensure you have `ansible` installed on your local machine.
+
+### Execution
+
+1.  Export the required environment variables:
+    ```bash
+    export HOST_IP="your.chill_penguin.ip"
+    export ANSIBLE_USER="ansible"
+    export ANSIBLE_PASSWORD="your_ssh_password"
+    
+    # Docker Service Configuration
+    export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
+    export ORGANIZR_PORT="8080" # Optional, defaults to 8080
+    ```
+
+2.  Run the playbook from the project root:
+    ```bash
+    ansible-playbook -i ansible/inventory.ini ansible/playbook.yml
+    ```
+
+This will connect to the server, update the system, install Docker (and its plugins), create the `apps` user, and configure the necessary groups.

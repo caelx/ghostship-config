@@ -213,3 +213,6 @@ override.tf.json
 terraform.rc
 
 # End of https://www.toptal.com/developers/gitignore/api/python,ansible,terraform
+
+# Local environment variables (direnv)
+.envrc

@@ -2,11 +2,8 @@
 - name: Setup Docker on Ghostship (chill_penguin Asahi Linux)
   hosts: ghostship
   become: true
-  vars:
-    apps_user: apps
-    cloudflared_token: "{{ lookup('env', 'CLOUDFLARED_TUNNEL_TOKEN') }}"
-    config_dir: "/opt/ghostship/config"
-    install_dir: "/opt/ghostship"
+  vars_files:
+    - vars/main.yml
 
   tasks:
     - name: Ensure system is updated (including Asahi Linux specific packages)

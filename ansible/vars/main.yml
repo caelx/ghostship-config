@@ -1,0 +1,4 @@
+apps_user: apps
+cloudflared_token: "{{ lookup('env', 'CLOUDFLARED_TUNNEL_TOKEN') }}"
+config_dir: "/opt/ghostship/config"
+install_dir: "/opt/ghostship"

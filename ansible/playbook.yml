@@ -5,7 +5,6 @@
   vars:
     apps_user: apps
     cloudflared_token: "{{ lookup('env', 'CLOUDFLARED_TUNNEL_TOKEN') }}"
-    organizr_port: "{{ lookup('env', 'ORGANIZR_PORT') | default('8080', true) }}"
     config_dir: "/opt/ghostship/config"
     install_dir: "/opt/ghostship"
 

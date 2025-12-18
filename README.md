@@ -168,7 +168,6 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     
     # Docker Service Configuration
     export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
-    export ORGANIZR_PORT="8080" # Optional, defaults to 8080
     ```
 
 2.  Run the playbook from the project root:

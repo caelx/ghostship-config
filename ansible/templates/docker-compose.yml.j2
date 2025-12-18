@@ -21,8 +21,6 @@ services:
       - PGID={{ apps_gid }}
       - fpm-user=apps
       - fpm-group=apps
-    ports:
-      - "${ORGANIZR_PORT:-8080}:80"
     volumes:
       - ${CONFIG_DIR}/organizr:/config
     networks:

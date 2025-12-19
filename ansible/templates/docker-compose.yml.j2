@@ -25,6 +25,10 @@ services:
     networks:
       - ghostship_net
 
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    container_name: nzbget
+    restart: on-failure
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}

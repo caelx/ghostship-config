@@ -33,8 +33,6 @@ services:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
       - TZ=UTC
-      - NZBGET_USER=${NZBGET_USER}
-      - NZBGET_PASS=${NZBGET_PASS}
     volumes:
       - ${CONFIG_DIR}/nzbget:/config
       - ${INSTALL_DIR}/downloads:/downloads

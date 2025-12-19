@@ -116,6 +116,15 @@
         mode: '0644'
       notify: Restart Docker Compose
 
+    - name: Deploy homepage widgets.yaml
+      template:
+        src: homepage/widgets.yaml.j2
+        dest: "{{ config_dir }}/homepage/widgets.yaml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
+
     - name: Deploy .env file
       template:
         src: .env.j2

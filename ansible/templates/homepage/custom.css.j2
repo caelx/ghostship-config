@@ -7,9 +7,13 @@ header div.flex-row.items-center,
     gap: 0.125rem !important;
 }
 
-/* Ensure datetime widgets specifically are compact */
+/* Force datetime widget to wrap time and date */
 .homepage-widget-datetime,
 .widget-datetime {
+    white-space: pre-wrap !important;
+    width: min-content !important;
+    text-align: right !important;
+    line-height: 1.1 !important;
     margin-left: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;

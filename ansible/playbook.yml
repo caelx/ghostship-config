@@ -99,14 +99,24 @@
         group: "{{ apps_user }}"
         mode: '0755'
 
-    - name: Deploy .env file
-      template:
-        src: .env.j2
-        dest: "{{ install_dir }}/.env"
+    - name: Create downloads directory
+      file:
+        path: "{{ install_dir }}/downloads"
+        state: directory
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0600'
+        mode: '0755'
+
+    - name: Deploy homepage services.yaml
+      template:
+        src: homepage/services.yaml.j2
+        dest: "{{ config_dir }}/homepage/services.yaml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
       notify: Restart Docker Compose
+
+    - name: Deploy .env file
 
     - name: Deploy docker-compose.yml
       template:

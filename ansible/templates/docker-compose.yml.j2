@@ -47,6 +47,7 @@ services:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
       - TZ=UTC
+      - HOMEPAGE_ALLOWED_HOSTS=*
     volumes:
       - ${CONFIG_DIR}/homepage:/app/config
     networks:

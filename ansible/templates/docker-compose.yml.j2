@@ -12,22 +12,21 @@ services:
     networks:
       - ghostship_net
 
-  organizr:
-    image: organizr/organizr:latest
-    container_name: organizr
+  muximux:
+    image: linuxserver/muximux:latest
+    container_name: muximux
     restart: on-failure
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
-      - fpm-user=apps
-      - fpm-group=apps
+      - TZ=UTC
     volumes:
-      - ${CONFIG_DIR}/organizr:/config
+      - ${CONFIG_DIR}/muximux:/config
     networks:
       - ghostship_net
 
   nzbget:
-    image: nzbget/nzbget:latest
+    image: linuxserver/nzbget:latest
     container_name: nzbget
     restart: on-failure
     environment:
@@ -35,7 +34,6 @@ services:
       - PGID={{ apps_gid }}
     volumes:
       - ${CONFIG_DIR}/nzbget:/config
-      - ${INSTALL_DIR}/downloads:/downloads
     networks:
       - ghostship_net
 

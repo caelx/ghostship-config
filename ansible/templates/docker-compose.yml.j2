@@ -39,6 +39,19 @@ services:
     networks:
       - ghostship_net
 
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: on-failure
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/homepage:/app/config
+    networks:
+      - ghostship_net
+
 networks:
   ghostship_net:
     driver: bridge

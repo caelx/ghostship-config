@@ -125,6 +125,15 @@
         mode: '0644'
       notify: Restart Docker Compose
 
+    - name: Deploy homepage settings.yaml
+      template:
+        src: homepage/settings.yaml.j2
+        dest: "{{ config_dir }}/homepage/settings.yaml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
+
     - name: Deploy .env file
       template:
         src: .env.j2

@@ -23,6 +23,30 @@ services:
     networks:
       - ghostship_net
 
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 6789:6789
+      - 8000:8000
+    environment:
+      - VPN_SERVICE_PROVIDER=surfshark
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=10.14.0.2/16
+      - SERVER_COUNTRIES=${VPN_COUNTRY}
+      - TZ=UTC
+      - UPDATER_PERIOD=24h
+    volumes:
+      - ${CONFIG_DIR}/gluetun:/gluetun
+    restart: on-failure
+    networks:
+      - ghostship_net
+
   nzbget:
     image: lscr.io/linuxserver/nzbget:latest
     container_name: nzbget
@@ -33,9 +57,12 @@ services:
       - TZ=UTC
     volumes:
       - ${CONFIG_DIR}/nzbget:/config
-      - ${INSTALL_DIR}/downloads:/downloads
-    networks:
-      - ghostship_net
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads/Usenet
+    network_mode: service:gluetun
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
@@ -55,3 +82,17 @@ services:
 networks:
   ghostship_net:
     driver: bridge
+
+volumes:
+  share:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: "addr=192.168.200.106,rw,nfsvers=4,hard,intr,rsize=8192,wsize=8192"
+      device: ":/volume1/share"
+  plex:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: "addr=192.168.200.106,rw,nfsvers=4,hard,intr,rsize=8192,wsize=8192"
+      device: ":/volume1/plex"

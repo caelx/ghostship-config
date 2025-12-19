@@ -1,4 +1,6 @@
 cloudflared_token: "{{ lookup('env', 'CLOUDFLARED_TUNNEL_TOKEN') }}"
+vpn_wg_private_key: "{{ lookup('env', 'WIREGUARD_PRIVATE_KEY') }}"
+vpn_country: "{{ lookup('env', 'VPN_COUNTRY') | default('', true) }}"
 apps_user: apps
 config_dir: "/home/apps/config"
 install_dir: "/home/apps"

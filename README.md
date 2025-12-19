@@ -168,6 +168,8 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     
     # Docker Service Configuration
     export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
+    export NZBGET_USER="nzbget" # Optional, defaults to nzbget
+    export NZBGET_PASS="tegbzn68" # Optional, defaults to tegbzn68
     ```
 
 2.  Run the playbook from the project root:

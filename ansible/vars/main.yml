@@ -1,4 +1,6 @@
-apps_user: apps
 cloudflared_token: "{{ lookup('env', 'CLOUDFLARED_TUNNEL_TOKEN') }}"
+nzbget_user: "{{ lookup('env', 'NZBGET_USER') | default('nzbget', true) }}"
+nzbget_pass: "{{ lookup('env', 'NZBGET_PASS') | default('tegbzn68', true) }}"
+apps_user: apps
 config_dir: "/home/apps/config"
 install_dir: "/home/apps"

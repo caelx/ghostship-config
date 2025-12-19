@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -45,11 +43,12 @@ services:
     restart: on-failure
     environment:
       - PUID={{ apps_uid }}
-      - PGID={{ apps_gid }}
+      - PGID={{ docker_gid }}
       - TZ=UTC
       - HOMEPAGE_ALLOWED_HOSTS=*
     volumes:
       - ${CONFIG_DIR}/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - ghostship_net
 

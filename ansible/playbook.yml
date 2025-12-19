@@ -78,10 +78,17 @@
         key: "{{ apps_user }}"
       register: apps_user_info
 
-    - name: Set apps_uid and apps_gid facts
+    - name: Get 'docker' group info
+      getent:
+        database: group
+        key: docker
+      register: docker_group_info
+
+    - name: Set apps_uid, apps_gid and docker_gid facts
       set_fact:
         apps_uid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][1] }}"
         apps_gid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][2] }}"
+        docker_gid: "{{ docker_group_info.ansible_facts.getent_group['docker'][1] }}"
 
     - name: Create install directory
       file:
@@ -107,40 +114,19 @@
         group: "{{ apps_user }}"
         mode: '0755'
 
-    - name: Deploy homepage services.yaml
+    - name: Deploy homepage config files
       template:
-        src: homepage/services.yaml.j2
-        dest: "{{ config_dir }}/homepage/services.yaml"
+        src: "homepage/{{ item }}.j2"
+        dest: "{{ config_dir }}/homepage/{{ item }}"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
         mode: '0644'
-      notify: Restart Docker Compose
-
-    - name: Deploy homepage widgets.yaml
-      template:
-        src: homepage/widgets.yaml.j2
-        dest: "{{ config_dir }}/homepage/widgets.yaml"
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0644'
-      notify: Restart Docker Compose
-
-    - name: Deploy homepage settings.yaml
-      template:
-        src: homepage/settings.yaml.j2
-        dest: "{{ config_dir }}/homepage/settings.yaml"
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0644'
-      notify: Restart Docker Compose
-
-    - name: Deploy homepage custom.css
-      template:
-        src: homepage/custom.css.j2
-        dest: "{{ config_dir }}/homepage/custom.css"
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0644'
+      loop:
+        - bookmarks.yaml
+        - services.yaml
+        - widgets.yaml
+        - docker.yaml
+        - settings.yaml
       notify: Restart Docker Compose
 
     - name: Deploy .env file

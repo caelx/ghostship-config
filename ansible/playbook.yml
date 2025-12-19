@@ -134,6 +134,15 @@
         mode: '0644'
       notify: Restart Docker Compose
 
+    - name: Deploy homepage custom.css
+      template:
+        src: homepage/custom.css.j2
+        dest: "{{ config_dir }}/homepage/custom.css"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
+
     - name: Deploy .env file
       template:
         src: .env.j2

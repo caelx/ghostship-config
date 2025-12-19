@@ -26,6 +26,19 @@ services:
     networks:
       - ghostship_net
 
+  nzbget:
+    image: nzbget/nzbget:latest
+    container_name: nzbget
+    restart: on-failure
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+    volumes:
+      - ${CONFIG_DIR}/nzbget:/config
+      - ${INSTALL_DIR}/downloads:/downloads
+    networks:
+      - ghostship_net
+
 networks:
   ghostship_net:
     driver: bridge

@@ -128,23 +128,6 @@ services:
     networks:
       - ghostship_net
 
-  dockge:
-    image: louislam/dockge:latest
-    container_name: dockge
-    restart: on-failure
-    ports:
-      - 5001:5001
-    environment:
-      - PUID={{ apps_uid }}
-      - PGID={{ docker_gid }}
-      - TZ=UTC
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${CONFIG_DIR}/dockge:/app/data
-      - ${INSTALL_DIR}/stacks:/opt/stacks
-    networks:
-      - ghostship_net
-
 networks:
   ghostship_net:
     driver: bridge

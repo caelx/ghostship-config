@@ -32,14 +32,3 @@
             url: http://plex:32400
             key: "{{ plex_token }}"
             fields: ["streams", "movies", "tv"]
-
-- System:
-    - Dockge:
-        icon: dockge.png
-        href: http://{{ ansible_host }}:5001
-        description: Docker Compose Manager
-        server: chill-penguin
-        container: dockge
-        widget:
-            type: dockge
-            url: http://dockge:5001

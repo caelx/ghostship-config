@@ -113,22 +113,6 @@
         group: "{{ apps_user }}"
         mode: '0755'
 
-    - name: Create dockge config directory
-      file:
-        path: "{{ config_dir }}/dockge"
-        state: directory
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0755'
-
-    - name: Create stacks directory
-      file:
-        path: "{{ install_dir }}/stacks"
-        state: directory
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0755'
-
     - name: Deploy homepage config files
       template:
         src: "homepage/{{ item }}.j2"

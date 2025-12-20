@@ -30,9 +30,6 @@ services:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
-    ports:
-      - 6789:6789
-      - 8000:8000
     environment:
       - VPN_SERVICE_PROVIDER=surfshark
       - VPN_TYPE=wireguard
@@ -62,6 +59,25 @@ services:
         target: /downloads
         volume:
           subpath: Downloads/Usenet
+    network_mode: service:gluetun
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: on-failure
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - WEBUI_PORT=5000
+      - DOCKER_MODS=ghcr.io/vuetorrent/vuetorrent-lsio-mod:latest
+    volumes:
+      - ${CONFIG_DIR}/qbittorrent:/config
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads/Torrent
     network_mode: service:gluetun
 
   homepage:

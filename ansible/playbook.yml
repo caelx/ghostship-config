@@ -106,14 +106,6 @@
         group: "{{ apps_user }}"
         mode: '0755'
 
-    - name: Create downloads directory
-      file:
-        path: "{{ install_dir }}/downloads"
-        state: directory
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0755'
-
     - name: Deploy homepage config files
       template:
         src: "homepage/{{ item }}.j2"

@@ -29,6 +29,12 @@
         name: cockpit
         state: absent
 
+    - name: Stop and disable Avahi daemon
+      systemd:
+        name: avahi-daemon
+        state: stopped
+        enabled: no
+
     - name: Install dnf-plugins-core
       dnf:
         name: dnf-plugins-core
@@ -48,6 +54,7 @@
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
+          - python3-lxml
         state: latest
 
     - name: Ensure Docker service is started and enabled
@@ -106,6 +113,22 @@
         group: "{{ apps_user }}"
         mode: '0755'
 
+    - name: Create dockge config directory
+      file:
+        path: "{{ config_dir }}/dockge"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0755'
+
+    - name: Create stacks directory
+      file:
+        path: "{{ install_dir }}/stacks"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0755'
+
     - name: Deploy homepage config files
       template:
         src: "homepage/{{ item }}.j2"
@@ -146,8 +169,32 @@
       register: docker_compose_output
       changed_when: "docker_compose_output.stderr is search('Recreating|Created|Started')"
 
+    - name: Check if Plex Preferences.xml exists
+      stat:
+        path: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Preferences.xml"
+      register: plex_prefs
+
+    - name: Configure Plex Preferences
+      community.general.xml:
+        path: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Preferences.xml"
+        xpath: /Preferences
+        attribute: "{{ item.key }}"
+        value: "{{ item.value }}"
+      loop:
+        - { key: 'FriendlyName', value: 'chill-penguin' }
+        - { key: 'LanNetworksBandwidth', value: '192.168.1.0/255.255.255.0,172.16.0.0/255.240.0.0' }
+        - { key: 'customConnections', value: 'http://192.168.200.127:32400' }
+        - { key: 'allowedNetworks', value: '192.168.1.0/255.255.255.0,172.16.0.0/255.240.0.0' }
+      when: plex_prefs.stat.exists
+      notify: Restart Plex
+
   handlers:
     - name: Restart Docker Compose
       shell: docker compose down && docker compose up -d
+      args:
+        chdir: "{{ install_dir }}"
+
+    - name: Restart Plex
+      shell: docker compose restart plex
       args:
         chdir: "{{ install_dir }}"

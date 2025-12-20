@@ -9,8 +9,6 @@ services:
       - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
     networks:
       - ghostship_net
-    extra_hosts:
-      - host.docker.internal:host-gateway
 
   muximux:
     image: lscr.io/linuxserver/muximux:latest
@@ -86,13 +84,27 @@ services:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
     restart: on-failure
-    network_mode: host
+    networks:
+      - ghostship_net
+    ports:
+      - 32400:32400
+      - 1900:1900/udp
+      - 3005:3005
+      - 5353:5353/udp
+      - 8324:8324
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 32469:32469
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
       - TZ=UTC
       - VERSION=latest
       - PLEX_CLAIM=${PLEX_CLAIM}
+    devices:
+      - /dev/dri:/dev/dri
     volumes:
       - ${CONFIG_DIR}/plex:/config
       - type: volume
@@ -113,6 +125,23 @@ services:
     volumes:
       - ${CONFIG_DIR}/homepage:/app/config
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ghostship_net
+
+  dockge:
+    image: louislam/dockge:latest
+    container_name: dockge
+    restart: on-failure
+    ports:
+      - 5001:5001
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ docker_gid }}
+      - TZ=UTC
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CONFIG_DIR}/dockge:/app/data
+      - ${INSTALL_DIR}/stacks:/opt/stacks
     networks:
       - ghostship_net
 

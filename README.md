@@ -157,6 +157,10 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
 
 1.  Ensure you have completed the "Configure Asahi Linux for Ansible Management" section above.
 2.  Ensure you have `ansible` installed on your local machine.
+3.  Install the required Ansible collections:
+    ```bash
+    ansible-galaxy collection install community.general
+    ```
 
 ### Execution
 
@@ -170,6 +174,7 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
     export WIREGUARD_PRIVATE_KEY="your_wireguard_private_key"
     export PLEX_CLAIM="your_plex_claim_token"
+    export PLEX_TOKEN="your_plex_access_token" # Optional: For Homepage widget
     export VPN_COUNTRY="your_country" # Optional: e.g. "United States" for closest server
     export TZ="UTC" # Optional: Default is UTC
     ```

@@ -19,6 +19,12 @@
         widget:
             type: qbittorrent
             url: http://gluetun:5000
+    - MeTube:
+        icon: youtube.png
+        href: http://{{ ansible_host }}:8081
+        description: YouTube Downloader
+        server: chill-penguin
+        container: metube
 
 - Media:
     - Plex:

@@ -113,6 +113,24 @@ services:
         volume:
           subpath: Library
 
+  metube:
+    image: ghcr.io/alexta69/metube:latest
+    container_name: metube
+    restart: on-failure
+    ports:
+      - 8081:8081
+    environment:
+      - UID={{ apps_uid }}
+      - GID={{ apps_gid }}
+    volumes:
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads/YouTube
+    networks:
+      - ghostship_net
+
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage

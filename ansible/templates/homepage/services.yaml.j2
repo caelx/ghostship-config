@@ -38,3 +38,11 @@
             url: http://plex:32400
             key: "{{ plex_token }}"
             fields: ["streams", "movies", "tv"]
+
+- Tools:
+    - BentoPDF:
+        icon: bento.png
+        href: http://{{ ansible_host }}:3001
+        description: PDF Toolkit
+        server: chill-penguin
+        container: bentopdf

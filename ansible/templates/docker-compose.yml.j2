@@ -129,6 +129,15 @@ services:
     networks:
       - ghostship_net
 
+  bentopdf:
+    image: bentopdf/bentopdf:latest
+    container_name: bentopdf
+    restart: on-failure
+    ports:
+      - 3001:8080
+    networks:
+      - ghostship_net
+
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage

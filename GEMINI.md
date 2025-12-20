@@ -15,3 +15,7 @@ Docker images should use the base name as the container name.  They should all b
 The ansible account will be used to provision and manage the server.  All services should run using an apps service account which will be used to limit permissions for all installed apps.
 
 All docker images should must use and have arm64 compatible images in order to be used.
+
+Don't automatically expose ports for docker containers unless it's absolutely necessary like for Plex.
+
+Don't add an href to a service when adding it to homepage, make the href point to #.

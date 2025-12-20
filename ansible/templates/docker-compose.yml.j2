@@ -9,6 +9,8 @@ services:
       - TUNNEL_TOKEN=${CLOUDFLARED_TUNNEL_TOKEN}
     networks:
       - ghostship_net
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   muximux:
     image: lscr.io/linuxserver/muximux:latest
@@ -79,6 +81,25 @@ services:
         volume:
           subpath: Downloads/Torrent
     network_mode: service:gluetun
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    restart: on-failure
+    network_mode: host
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - VERSION=latest
+      - PLEX_CLAIM=${PLEX_CLAIM}
+    volumes:
+      - ${CONFIG_DIR}/plex:/config
+      - type: volume
+        source: share
+        target: /library
+        volume:
+          subpath: Library
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest

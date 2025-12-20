@@ -169,6 +169,7 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     # Docker Service Configuration
     export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
     export WIREGUARD_PRIVATE_KEY="your_wireguard_private_key"
+    export PLEX_CLAIM="your_plex_claim_token"
     export VPN_COUNTRY="your_country" # Optional: e.g. "United States" for closest server
     export TZ="UTC" # Optional: Default is UTC
     ```

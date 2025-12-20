@@ -19,12 +19,15 @@
         widget:
             type: qbittorrent
             url: http://gluetun:5000
-    - MeTube:
-        icon: youtube.png
+    - Gluetun:
+        icon: gluetun.png
         href: "#"
-        description: YouTube Downloader
+        description: VPN Client
         server: chill-penguin
-        container: metube
+        container: gluetun
+        widget:
+            type: gluetun
+            url: http://gluetun:8000
 
 - Media:
     - Plex:
@@ -39,24 +42,19 @@
             key: "{{ plex_token }}"
             fields: ["streams", "movies", "tv"]
 
-- Tools:
+- System:
+    - MeTube:
+        icon: youtube.png
+        href: "#"
+        description: YouTube Downloader
+        server: chill-penguin
+        container: metube
     - BentoPDF:
         icon: bentopdf.png
         href: "#"
         description: PDF Toolkit
         server: chill-penguin
         container: bentopdf
-
-- System:
-    - Gluetun:
-        icon: gluetun.png
-        href: "#"
-        description: VPN Client
-        server: chill-penguin
-        container: gluetun
-        widget:
-            type: gluetun
-            url: http://gluetun:8000
     - Cloudflared:
         icon: cloudflare.png
         href: "#"
@@ -64,7 +62,7 @@
         server: chill-penguin
         container: cloudflared
     - Muximux:
-        icon: heimdall.png
+        icon: dashboard.png
         href: "#"
         description: Lightweight Portal
         server: chill-penguin

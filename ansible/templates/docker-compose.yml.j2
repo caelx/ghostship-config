@@ -2,7 +2,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
-    restart: on-failure
+    restart: always
     user: "{{ apps_uid }}:{{ apps_gid }}"
     command: tunnel run
     environment:
@@ -15,7 +15,7 @@ services:
   muximux:
     image: lscr.io/linuxserver/muximux:latest
     container_name: muximux
-    restart: on-failure
+    restart: always
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
@@ -42,14 +42,14 @@ services:
       - UPDATER_PERIOD=24h
     volumes:
       - ${CONFIG_DIR}/gluetun:/gluetun
-    restart: on-failure
+    restart: always
     networks:
       - ghostship_net
 
   nzbget:
     image: lscr.io/linuxserver/nzbget:latest
     container_name: nzbget
-    restart: on-failure
+    restart: always
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
@@ -66,7 +66,7 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
-    restart: on-failure
+    restart: always
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
@@ -85,7 +85,7 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
-    restart: on-failure
+    restart: always
     networks:
       - ghostship_net
     ports:
@@ -118,7 +118,7 @@ services:
   metube:
     image: ghcr.io/alexta69/metube:latest
     container_name: metube
-    restart: on-failure
+    restart: always
     environment:
       - UID={{ apps_uid }}
       - GID={{ apps_gid }}
@@ -134,14 +134,14 @@ services:
   bentopdf:
     image: bentopdf/bentopdf:latest
     container_name: bentopdf
-    restart: on-failure
+    restart: always
     networks:
       - ghostship_net
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
-    restart: on-failure
+    restart: always
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ docker_gid }}

@@ -115,6 +115,89 @@ services:
         volume:
           subpath: Library
 
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/prowlarr:/config
+    networks:
+      - ghostship_net
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/sonarr:/config
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads
+      - type: volume
+        source: share
+        target: /tv
+        volume:
+          subpath: Library/TV
+    networks:
+      - ghostship_net
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/radarr:/config
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads
+      - type: volume
+        source: share
+        target: /movies
+        volume:
+          subpath: Library/Movies
+    networks:
+      - ghostship_net
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: always
+    environment:
+      - TZ=UTC
+      - LOG_LEVEL=info
+    networks:
+      - ghostship_net
+
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/tautulli:/config
+      - ${CONFIG_DIR}/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro
+    networks:
+      - ghostship_net
+
   metube:
     image: ghcr.io/alexta69/metube:latest
     container_name: metube

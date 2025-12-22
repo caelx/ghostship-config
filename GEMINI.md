@@ -19,3 +19,5 @@ All docker images should must use and have arm64 compatible images in order to b
 Don't automatically expose ports for docker containers unless it's absolutely necessary like for Plex.
 
 Don't add an href to a service when adding it to homepage, make the href point to #.
+
+Do not commit changes to git.  This will be done by me manualy.

@@ -173,10 +173,13 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     # Docker Service Configuration
     export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
     export WIREGUARD_PRIVATE_KEY="your_wireguard_private_key"
-    export PLEX_CLAIM="your_plex_claim_token"
-    export PLEX_TOKEN="your_plex_access_token" # Optional: For Homepage widget
     export VPN_COUNTRY="your_country" # Optional: e.g. "United States" for closest server
-    export TZ="UTC" # Optional: Default is UTC
+    export PLEX_CLAIM="your_plex_claim_token"
+    export PLEX_TOKEN="your_plex_access_token" # For Homepage Plex widget
+    export TAUTULLI_API_KEY="your_tautulli_api_key" # For Homepage Tautulli widget
+    export PROWLARR_API_KEY="your_prowlarr_api_key" # For Homepage Prowlarr widget
+    export SONARR_API_KEY="your_sonarr_api_key" # For Homepage Sonarr widget
+    export RADARR_API_KEY="your_radarr_api_key" # For Homepage Radarr widget
     ```
 
 2.  Run the playbook from the project root:
@@ -185,3 +188,27 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     ```
 
 This will connect to the server, update the system, install Docker (and its plugins), create the `apps` user, and configure the necessary groups.
+
+
+
+### Service Configuration Notes
+
+
+
+#### qBittorrent / VueTorrent
+
+For the qBittorrent WebUI (and VueTorrent) to function correctly behind the VPN container and with the dashboard widgets, you must configure the following in the qBittorrent WebUI settings:
+
+- **Web UI**: Disable "Enable clickjacking protection".
+
+- **Web UI**: Disable "Enable Cross-Site Request Forgery (CSRF) protection".
+
+- **Web UI**: Add `0.0.0.0/0` to "Bypass authentication for clients in whitelisted IP subnets".
+
+#### Tautulli
+For the Tautulli dashboard widget and proxy access to function correctly, you must configure the following in the Tautulli settings:
+- **Web Interface**: Click "Show Advanced" and check "Enable HTTP Proxy".
+- **Web Interface**: Clear out both "HTTP Username" and "HTTP Password".
+
+#### Prowlarr
+For Prowlarr to work properly, you must set `AuthenticationMethod` to `External` in the `config.xml` file.

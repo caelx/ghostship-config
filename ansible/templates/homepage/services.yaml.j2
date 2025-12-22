@@ -1,34 +1,4 @@
 # services
-
-- Downloads:
-    - NZBGet:
-        icon: nzbget.png
-        href: "#"
-        description: NZB Downloader
-        server: chill-penguin
-        container: nzbget
-        widget:
-            type: nzbget
-            url: http://gluetun:6789
-    - qBittorrent:
-        icon: qbittorrent.png
-        href: "#"
-        description: Torrent Downloader
-        server: chill-penguin
-        container: qbittorrent
-        widget:
-            type: qbittorrent
-            url: http://gluetun:5000
-    - Gluetun:
-        icon: gluetun.png
-        href: "#"
-        description: VPN Client
-        server: chill-penguin
-        container: gluetun
-        widget:
-            type: gluetun
-            url: http://gluetun:8000
-
 - Media:
     - Plex:
         icon: plex.png
@@ -41,20 +11,77 @@
             url: http://plex:32400
             key: "{{ plex_token }}"
             fields: ["streams", "movies", "tv"]
+    - Tautulli:
+        icon: tautulli.png
+        href: "#"
+        description: Plex Monitoring
+        server: chill-penguin
+        container: tautulli
+        widget:
+            type: tautulli
+            url: http://tautulli:8181
+            key: "{{ tautulli_api_key }}"
+
+- Downloads:
+    - Gluetun:
+        icon: gluetun.png
+        href: "#"
+        description: VPN Client
+        server: chill-penguin
+        container: gluetun
+        widget:
+            type: gluetun
+            url: http://gluetun:8000
+    - NZBGet:
+        icon: nzbget.png
+        href: "#"
+        description: NZB Downloader
+        server: chill-penguin
+        container: nzbget
+        widget:
+            type: nzbget
+            url: http://gluetun:6789
+    - VueTorrent:
+        icon: vuetorrent.png
+        href: "#"
+        description: Torrent Downloader
+        server: chill-penguin
+        container: qbittorrent
+        widget:
+            type: qbittorrent
+            url: http://gluetun:5000
+    - Prowlarr:
+        icon: prowlarr.png
+        href: "#"
+        description: Indexer Manager
+        server: chill-penguin
+        container: prowlarr
+        widget:
+            type: prowlarr
+            url: http://prowlarr:9696
+            key: "{{ prowlarr_api_key }}"
+    - Sonarr:
+        icon: sonarr.png
+        href: "#"
+        description: TV Series Manager
+        server: chill-penguin
+        container: sonarr
+        widget:
+            type: sonarr
+            url: http://sonarr:8989
+            key: "{{ sonarr_api_key }}"
+    - Radarr:
+        icon: radarr.png
+        href: "#"
+        description: Movie Manager
+        server: chill-penguin
+        container: radarr
+        widget:
+            type: radarr
+            url: http://radarr:7878
+            key: "{{ radarr_api_key }}"
 
 - System:
-    - MeTube:
-        icon: youtube.png
-        href: "#"
-        description: YouTube Downloader
-        server: chill-penguin
-        container: metube
-    - BentoPDF:
-        icon: bentopdf.png
-        href: "#"
-        description: PDF Toolkit
-        server: chill-penguin
-        container: bentopdf
     - Cloudflared:
         icon: cloudflare.png
         href: "#"
@@ -73,3 +100,23 @@
         description: Dashboard
         server: chill-penguin
         container: homepage
+    - BentoPDF:
+        icon: bentopdf.png
+        href: "#"
+        description: PDF Toolkit
+        server: chill-penguin
+        container: bentopdf
+    - MeTube:
+        icon: youtube.png
+        href: "#"
+        description: YouTube Downloader
+        server: chill-penguin
+        container: metube
+    - FlareSolverr:
+        icon: flaresolverr.png
+        href: "#"
+        description: Proxy Server
+        server: chill-penguin
+        container: flaresolverr
+
+- Spacer: []

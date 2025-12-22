@@ -172,6 +172,24 @@
       when: plex_prefs.stat.exists
       notify: Restart Plex
 
+    - name: Check if *Arr config.xml exists
+      stat:
+        path: "{{ config_dir }}/{{ item }}/config.xml"
+      register: arr_configs
+      loop:
+        - prowlarr
+        - sonarr
+        - radarr
+
+    - name: Configure AuthenticationMethod to External for *Arr services
+      community.general.xml:
+        path: "{{ config_dir }}/{{ item.item }}/config.xml"
+        xpath: /Config/AuthenticationMethod
+        value: 'External'
+      loop: "{{ arr_configs.results }}"
+      when: item.stat.exists
+      notify: Restart Arr Services
+
   handlers:
     - name: Restart Docker Compose
       shell: docker compose down && docker compose up -d
@@ -182,3 +200,9 @@
       shell: docker compose restart plex
       args:
         chdir: "{{ install_dir }}"
+
+    - name: Restart Arr Services
+      shell: docker compose restart prowlarr sonarr radarr
+      args:
+        chdir: "{{ install_dir }}"
+      

@@ -180,6 +180,7 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     export PROWLARR_API_KEY="your_prowlarr_api_key" # For Homepage Prowlarr widget
     export SONARR_API_KEY="your_sonarr_api_key" # For Homepage Sonarr widget
     export RADARR_API_KEY="your_radarr_api_key" # For Homepage Radarr widget
+    export BAZARR_API_KEY="your_bazarr_api_key" # For Homepage Bazarr widget
     ```
 
 2.  Run the playbook from the project root:

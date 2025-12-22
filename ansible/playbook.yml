@@ -35,26 +35,22 @@
         state: stopped
         enabled: no
 
-    - name: Install dnf-plugins-core
-      dnf:
-        name: dnf-plugins-core
-        state: present
-
     - name: Download Docker CE repo file
       get_url:
         url: https://download.docker.com/linux/fedora/docker-ce.repo
         dest: /etc/yum.repos.d/docker-ce.repo
         mode: '0644'
 
-    - name: Install Docker packages
+    - name: Install required packages
       dnf:
         name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
-          - python3-lxml
+          - dnf-plugins-core # Required for managing DNF repositories
+          - docker-ce # Docker Engine - Community
+          - docker-ce-cli # CLI for interacting with Docker
+          - containerd.io # Container runtime
+          - docker-buildx-plugin # Modern build capabilities (multi-arch support)
+          - docker-compose-plugin # Docker Compose V2
+          - python3-lxml # Required for Ansible xml module to configure service XML files
         state: latest
 
     - name: Ensure Docker service is started and enabled
@@ -97,21 +93,58 @@
         apps_gid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][2] }}"
         docker_gid: "{{ docker_group_info.ansible_facts.getent_group['docker'][1] }}"
 
-    - name: Create install directory
+    - name: Create app directories
       file:
-        path: "{{ install_dir }}"
+        path: "{{ item }}"
         state: directory
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
         mode: '0755'
+      loop:
+        - "{{ install_dir }}"
+        - "{{ config_dir }}"
+        - "{{ config_dir }}/homepage"
+        - "{{ config_dir }}/plex"
+        - "{{ config_dir }}/tautulli"
+        - "{{ config_dir }}/posterizarr"
+        - "{{ config_dir }}/posterizarr/assets"
+        - "{{ config_dir }}/posterizarr/assetsbackup"
+        - "{{ config_dir }}/posterizarr/manualassets"
+        - "{{ config_dir }}/nzbget"
+        - "{{ config_dir }}/qbittorrent"
+        - "{{ config_dir }}/prowlarr"
+        - "{{ config_dir }}/sonarr"
+        - "{{ config_dir }}/radarr"
+        - "{{ config_dir }}/bazarr"
+        - "{{ config_dir }}/muximux"
+        - "{{ config_dir }}/gluetun"
 
-    - name: Create config directory
-      file:
-        path: "{{ config_dir }}"
-        state: directory
+    - name: Deploy .env file
+      template:
+        src: .env.j2
+        dest: "{{ install_dir }}/.env"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0755'
+        mode: '0600'
+      notify: Restart Docker Compose
+      register: env_deploy
+
+    - name: Deploy docker-compose.yml
+      template:
+        src: docker-compose.yml.j2
+        dest: "{{ install_dir }}/docker-compose.yml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
+      register: compose_deploy
+
+    - name: Ensure Docker Compose stack is running
+      shell: docker compose up -d
+      args:
+        chdir: "{{ install_dir }}"
+      register: docker_compose_output
+      changed_when: "docker_compose_output.stderr is search('Recreating|Created|Started')"
 
     - name: Deploy homepage config files
       template:
@@ -126,32 +159,7 @@
         - widgets.yaml
         - docker.yaml
         - settings.yaml
-      notify: Restart Docker Compose
-
-    - name: Deploy .env file
-      template:
-        src: .env.j2
-        dest: "{{ install_dir }}/.env"
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0600'
-      notify: Restart Docker Compose
-
-    - name: Deploy docker-compose.yml
-      template:
-        src: docker-compose.yml.j2
-        dest: "{{ install_dir }}/docker-compose.yml"
-        owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
-        mode: '0644'
-      notify: Restart Docker Compose
-
-    - name: Ensure Docker Compose stack is running
-      shell: docker compose up -d
-      args:
-        chdir: "{{ install_dir }}"
-      register: docker_compose_output
-      changed_when: "docker_compose_output.stderr is search('Recreating|Created|Started')"
+      notify: Restart Homepage
 
     - name: Check if Plex Preferences.xml exists
       stat:
@@ -196,13 +204,21 @@
       args:
         chdir: "{{ install_dir }}"
 
+    - name: Restart Homepage
+      shell: docker compose restart homepage
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+
     - name: Restart Plex
       shell: docker compose restart plex
       args:
         chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
 
     - name: Restart Arr Services
-      shell: docker compose restart prowlarr sonarr radarr
+      shell: docker compose restart prowlarr sonarr radarr bazarr
       args:
         chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
       

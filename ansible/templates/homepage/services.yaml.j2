@@ -80,6 +80,22 @@
             type: radarr
             url: http://radarr:7878
             key: "{{ radarr_api_key }}"
+    - Bazarr:
+        icon: bazarr.png
+        href: "#"
+        description: Subtitle Manager
+        server: chill-penguin
+        container: bazarr
+        widget:
+            type: bazarr
+            url: http://bazarr:6767
+            key: "{{ bazarr_api_key }}"
+    - Posterizarr:
+        icon: posterizarr.png
+        href: "#"
+        description: Poster Manager
+        server: chill-penguin
+        container: posterizarr
 
 - System:
     - Cloudflared:

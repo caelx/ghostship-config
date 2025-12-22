@@ -174,6 +174,29 @@ services:
     networks:
       - ghostship_net
 
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/bazarr:/config
+      - type: volume
+        source: share
+        target: /movies
+        volume:
+          subpath: Library/Movies
+      - type: volume
+        source: share
+        target: /tv
+        volume:
+          subpath: Library/TV
+    networks:
+      - ghostship_net
+
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -181,6 +204,25 @@ services:
     environment:
       - TZ=UTC
       - LOG_LEVEL=info
+    networks:
+      - ghostship_net
+
+  posterizarr:
+    image: ghcr.io/fscorrupt/posterizarr:latest
+    container_name: posterizarr
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - TERM=xterm
+      - RUN_TIME=disabled
+    volumes:
+      - ${CONFIG_DIR}/posterizarr:/config
+      - ${CONFIG_DIR}/posterizarr/assets:/assets
+      - ${CONFIG_DIR}/posterizarr/assetsbackup:/assetsbackup
+      - ${CONFIG_DIR}/posterizarr/manualassets:/manualassets
     networks:
       - ghostship_net
 
@@ -225,6 +267,7 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     restart: always
+    user: "{{ apps_uid }}:{{ docker_gid }}"
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ docker_gid }}
@@ -247,9 +290,3 @@ volumes:
       type: nfs
       o: "addr=192.168.200.106,rw,nfsvers=4,hard,intr,rsize=8192,wsize=8192"
       device: ":/volume1/share"
-  plex:
-    driver: local
-    driver_opts:
-      type: nfs
-      o: "addr=192.168.200.106,rw,nfsvers=4,hard,intr,rsize=8192,wsize=8192"
-      device: ":/volume1/plex"

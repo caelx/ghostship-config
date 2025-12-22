@@ -7,6 +7,7 @@ tautulli_api_key: "{{ lookup('env', 'TAUTULLI_API_KEY') }}"
 prowlarr_api_key: "{{ lookup('env', 'PROWLARR_API_KEY') }}"
 sonarr_api_key: "{{ lookup('env', 'SONARR_API_KEY') }}"
 radarr_api_key: "{{ lookup('env', 'RADARR_API_KEY') }}"
+bazarr_api_key: "{{ lookup('env', 'BAZARR_API_KEY') }}"
 apps_user: apps
 config_dir: "/home/apps/config"
 install_dir: "/home/apps"

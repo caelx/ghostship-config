@@ -21,3 +21,9 @@ Don't automatically expose ports for docker containers unless it's absolutely ne
 Don't add an href to a service when adding it to homepage, make the href point to #.
 
 Do not commit changes to git.  This will be done by me manualy.
+
+Make sure the config dir's are created when adding new images.
+
+Make sure the docker images are running under the app user.
+
+Do not wait for configuration files to show up, always check if it exists and skip if it doesn't.

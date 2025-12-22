@@ -51,6 +51,7 @@
           - docker-buildx-plugin # Modern build capabilities (multi-arch support)
           - docker-compose-plugin # Docker Compose V2
           - python3-lxml # Required for Ansible xml module to configure service XML files
+          - git # Required for cloning repositories
         state: latest
 
     - name: Ensure Docker service is started and enabled
@@ -103,7 +104,6 @@
       loop:
         - "{{ install_dir }}"
         - "{{ config_dir }}"
-        - "{{ config_dir }}/homepage"
         - "{{ config_dir }}/plex"
         - "{{ config_dir }}/tautulli"
         - "{{ config_dir }}/posterizarr"
@@ -118,6 +118,21 @@
         - "{{ config_dir }}/bazarr"
         - "{{ config_dir }}/muximux"
         - "{{ config_dir }}/gluetun"
+        - "{{ config_dir }}/homeassistant"
+        - "{{ config_dir }}/changedetection"
+        - "{{ config_dir }}/romm"
+        - "{{ config_dir }}/romm/resources"
+        - "{{ config_dir }}/romm/redis-data"
+        - "{{ config_dir }}/romm/config"
+        - "{{ config_dir }}/romm-db"
+
+    - name: Create homepage config directory
+      file:
+        path: "{{ config_dir }}/homepage"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: docker
+        mode: '0755'
 
     - name: Deploy .env file
       template:
@@ -151,7 +166,7 @@
         src: "homepage/{{ item }}.j2"
         dest: "{{ config_dir }}/homepage/{{ item }}"
         owner: "{{ apps_user }}"
-        group: "{{ apps_user }}"
+        group: docker
         mode: '0644'
       loop:
         - bookmarks.yaml
@@ -161,10 +176,53 @@
         - settings.yaml
       notify: Restart Homepage
 
+    - name: Check if Home Assistant configuration.yaml exists
+      stat:
+        path: "{{ config_dir }}/homeassistant/configuration.yaml"
+      register: ha_config
+
+    - name: Configure Home Assistant HTTP settings
+      blockinfile:
+        path: "{{ config_dir }}/homeassistant/configuration.yaml"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTP CONFIG"
+        block: |
+          
+          http:
+            use_x_forwarded_for: true
+            trusted_proxies:
+              - 0.0.0.0/0
+              - ::/0
+            use_x_frame_options: false
+      when: ha_config.stat.exists
+      notify: Restart Home Assistant
+
     - name: Check if Plex Preferences.xml exists
       stat:
         path: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Preferences.xml"
       register: plex_prefs
+
+    - name: Ensure Plex Plug-ins directory exists
+      file:
+        path: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Plug-ins"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0755'
+      when: plex_prefs.stat.exists
+
+    - name: Install Plex Plugins
+      git:
+        repo: "{{ item.repo }}"
+        dest: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Plug-ins/{{ item.name }}"
+        version: master
+        update: yes
+        force: yes
+      loop:
+        - { repo: 'https://github.com/circulon/IFDB.bundle.git', name: 'IFDB.bundle' }
+        - { repo: 'https://github.com/ZeroQI/YouTube-Agent.bundle.git', name: 'YouTube-Agent.bundle' }
+      become_user: "{{ apps_user }}"
+      when: plex_prefs.stat.exists
+      notify: Restart Plex
 
     - name: Configure Plex Preferences
       community.general.xml:
@@ -218,6 +276,12 @@
 
     - name: Restart Arr Services
       shell: docker compose restart prowlarr sonarr radarr bazarr
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+
+    - name: Restart Home Assistant
+      shell: docker compose restart homeassistant
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)

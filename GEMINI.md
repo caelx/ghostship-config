@@ -27,3 +27,9 @@ Make sure the config dir's are created when adding new images.
 Make sure the docker images are running under the app user.
 
 Do not wait for configuration files to show up, always check if it exists and skip if it doesn't.
+
+When adding environment variables always update the readme.
+
+Update the readme when major features are added.  Make sure the readme is kept up to date.
+
+Use a single database instance for any database needed and allow multiple databases.

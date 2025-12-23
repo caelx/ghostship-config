@@ -216,3 +216,6 @@ terraform.rc
 
 # Local environment variables (direnv)
 .envrc
+
+# Secrets
+.secrets/

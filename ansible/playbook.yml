@@ -63,7 +63,7 @@
     - name: Create 'apps' service account
       user:
         name: "{{ apps_user }}"
-        shell: /sbin/nologin
+        shell: /bin/bash
         create_home: yes
         system: yes
         password_lock: yes
@@ -105,6 +105,7 @@
         - "{{ install_dir }}"
         - "{{ config_dir }}"
         - "{{ config_dir }}/plex"
+        - "{{ config_dir }}/plex-auto-languages"
         - "{{ config_dir }}/tautulli"
         - "{{ config_dir }}/posterizarr"
         - "{{ config_dir }}/posterizarr/assets"
@@ -120,11 +121,23 @@
         - "{{ config_dir }}/gluetun"
         - "{{ config_dir }}/homeassistant"
         - "{{ config_dir }}/changedetection"
+        - "{{ config_dir }}/pyload"
+        - "{{ config_dir }}/it-tools"
         - "{{ config_dir }}/romm"
         - "{{ config_dir }}/romm/resources"
         - "{{ config_dir }}/romm/redis-data"
         - "{{ config_dir }}/romm/config"
-        - "{{ config_dir }}/romm-db"
+        - "{{ config_dir }}/mariadb"
+        - "{{ config_dir }}/mariadb/initdb.d"
+        - "{{ config_dir }}/tdarr"
+        - "{{ config_dir }}/tdarr/server"
+        - "{{ config_dir }}/tdarr/configs"
+        - "{{ config_dir }}/tdarr/logs"
+        - "{{ config_dir }}/tdarr/transcode"
+        - "{{ config_dir }}/booklore"
+        - "{{ config_dir }}/manyfold"
+        - "{{ config_dir }}/convertx"
+        - "{{ config_dir }}/arcane"
 
     - name: Create homepage config directory
       file:
@@ -153,6 +166,33 @@
         mode: '0644'
       notify: Restart Docker Compose
       register: compose_deploy
+
+    - name: Deploy MariaDB init script
+      template:
+        src: mariadb/init.sql.j2
+        dest: "{{ config_dir }}/mariadb/initdb.d/init.sql"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+
+    - name: Deploy RomM config
+      template:
+        src: romm/config.yml.j2
+        dest: "{{ config_dir }}/romm/config/config.yml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
+
+
+    - name: Deploy Plex Auto Languages config
+      template:
+        src: plex-auto-languages/config.yaml.j2
+        dest: "{{ config_dir }}/plex-auto-languages/config.yaml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Plex Auto Languages
 
     - name: Ensure Docker Compose stack is running
       shell: docker compose up -d
@@ -261,28 +301,47 @@
       shell: docker compose down && docker compose up -d
       args:
         chdir: "{{ install_dir }}"
+      tags: restart
+
+    - name: Restart MariaDB
+      shell: docker compose restart mariadb
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+      tags: restart
 
     - name: Restart Homepage
       shell: docker compose restart homepage
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      tags: restart
 
     - name: Restart Plex
       shell: docker compose restart plex
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      tags: restart
 
     - name: Restart Arr Services
       shell: docker compose restart prowlarr sonarr radarr bazarr
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      tags: restart
 
     - name: Restart Home Assistant
       shell: docker compose restart homeassistant
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      tags: restart
+
+    - name: Restart Plex Auto Languages
+      shell: docker compose restart plex-auto-languages
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+      tags: restart
       

@@ -1,5 +1,24 @@
 # services
 - Media:
+    - Calendar:
+        icon: mdi-calendar
+        href: "#"
+        description: Release Calendar
+        widget:
+            type: calendar
+            firstDayInWeek: sunday
+            view: agenda
+            timezone: Pacific/Honolulu
+            maxEvents: 12
+            integrations:
+                - type: sonarr
+                  service_group: Downloads
+                  service_name: Sonarr
+                  color: blue
+                - type: radarr
+                  service_group: Downloads
+                  service_name: Radarr
+                  color: red
     - Plex:
         icon: plex.png
         href: "#"
@@ -11,6 +30,12 @@
             url: http://plex:32400
             key: "{{ plex_token }}"
             fields: ["streams", "movies", "tv"]
+    - Plex Auto Languages:
+        icon: plex.png
+        href: "#"
+        description: Language Manager
+        server: chill-penguin
+        container: plex-auto-languages
     - Tautulli:
         icon: tautulli.png
         href: "#"
@@ -21,6 +46,18 @@
             type: tautulli
             url: http://tautulli:8181
             key: "{{ tautulli_api_key }}"
+    - Booklore:
+        icon: booklore.png
+        href: "#"
+        description: Ebook Manager
+        server: chill-penguin
+        container: booklore
+    - Manyfold:
+        icon: mdi-printer-3d
+        href: "#"
+        description: 3D Model Manager
+        server: chill-penguin
+        container: manyfold
 
 - Downloads:
     - Gluetun:
@@ -50,6 +87,15 @@
         widget:
             type: qbittorrent
             url: http://gluetun:5000
+    - PyLoad:
+        icon: pyload.png
+        href: "#"
+        description: Download Manager
+        server: chill-penguin
+        container: pyload
+        widget:
+            type: pyload
+            url: http://pyload:8000
     - Prowlarr:
         icon: prowlarr.png
         href: "#"
@@ -105,6 +151,15 @@
         widget:
             type: romm
             url: http://romm:8080
+    - Tdarr:
+        icon: tdarr.png
+        href: "#"
+        description: Transcoding
+        server: chill-penguin
+        container: tdarr
+        widget:
+            type: tdarr
+            url: http://tdarr:8265
 
 - System:
     - Cloudflared:
@@ -113,6 +168,11 @@
         description: Cloudflare Tunnel
         server: chill-penguin
         container: cloudflared
+        widget:
+            type: cloudflared
+            accountid: "{{ cloudflared_account_id }}"
+            tunnelid: "{{ cloudflared_tunnel_id }}"
+            key: "{{ cloudflared_api_token }}"
     - Muximux:
         icon: hubitat.png
         href: "#"
@@ -131,6 +191,18 @@
         description: PDF Toolkit
         server: chill-penguin
         container: bentopdf
+    - ConvertX:
+        icon: convertx.png
+        href: "#"
+        description: File Converter
+        server: chill-penguin
+        container: convertx
+    - IT-Tools:
+        icon: it-tools.png
+        href: "#"
+        description: Developer Tools
+        server: chill-penguin
+        container: it-tools
     - MeTube:
         icon: youtube.png
         href: "#"
@@ -163,5 +235,14 @@
         widget:
             type: changedetectionio
             url: http://changedetection:5000
+    - Arcane:
+        icon: mdi-docker
+        href: "#"
+        description: Docker Management
+        server: chill-penguin
+        container: arcane
+        widget:
+            type: arcane
+            url: http://arcane:3552
 
 - Spacer: []

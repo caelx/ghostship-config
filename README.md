@@ -185,9 +185,12 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     
     # Cloudflared Configuration
     export CLOUDFLARED_TUNNEL_TOKEN="your_cloudflared_token"
+    export CLOUDFLARED_ACCOUNT_ID="your_cloudflared_account_id" # Found in URL: https://dash.cloudflare.com/<ACCOUNT_ID>
+    export CLOUDFLARED_TUNNEL_ID="your_cloudflared_tunnel_id" # Found in Zero Trust > Networks > Tunnels
+    export CLOUDFLARED_API_TOKEN="your_cloudflared_api_token" # Requires 'Account:Cloudflare Tunnel:Read' permissions
 
     # VPN Configuration
-    export WIREGUARD_PRIVATE_KEY="your_wireguard_private_key="
+    export WIREGUARD_PRIVATE_KEY="your_wireguard_private_key"
     export VPN_COUNTRY="your_country" # Optional: e.g. "United States" for closest server
 
     # Plex Configuration
@@ -201,13 +204,13 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     export PROWLARR_API_KEY="your_prowlarr_api_key" # For Homepage Prowlarr widget
 
     # Sonarr Configuration
-    export SONARR_API_KEY="your_sonarr_api_key" # For Homepage Radarr widget
+    export SONARR_API_KEY="your_sonarr_api_key" # For Homepage Sonarr widget
 
     # Radarr Configuration
-    export RADARR_API_KEY="your_radarr_api_key" # For Homepage Bazarr widget
+    export RADARR_API_KEY="your_radarr_api_key" # For Homepage Radarr widget
 
     # Bazarr Configuration
-    export BAZARR_API_KEY="your_bazarr_api_key" # For Homepage Home Assistant widget
+    export BAZARR_API_KEY="your_bazarr_api_key" # For Homepage Bazarr widget
 
     # Home Assistant Configuration
     export HOMEASSISTANT_TOKEN="your_homeassistant_long_lived_access_token"
@@ -219,14 +222,98 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     export ROMM_IGDB_CLIENT_SECRET="your_igdb_client_secret"
     export ROMM_RETROACHIEVEMENTS_API_KEY="your_retroachievements_api_key"
     export ROMM_STEAMGRIDDB_API_KEY="your_steamgriddb_api_key"
+    
+    # Arcane Configuration
+    # Generate keys by running the following command twice (once for each secret):
+    # docker run --rm ghcr.io/getarcaneapp/arcane:latest /app/arcane generate secret
+    export ARCANE_ENCRYPTION_KEY="your_generated_32_byte_key" # Must be exactly 32 bytes
+    export ARCANE_JWT_SECRET="your_generated_jwt_secret"
+    
+    # Booklore Configuration (Optional)
+    # export BOOKLORE_DB_PASSWORD="your_secure_password" # Auto-generated if missing
+        
+    # Manyfold Configuration (Optional)
+    # export MANYFOLD_SECRET_KEY="your_random_64_char_key" # Auto-generated if missing
     ```
 
 2.  Run the playbook from the project root:
     ```bash
     ansible-playbook ansible/playbook.yml
     ```
+    
+    **Initial Setup (Skip Restarts):**
+    For the initial setup or when you want to avoid restarting services (e.g., to prevent interrupting database initialization), use the following command to skip all restart handlers:
+    ```bash
+    ansible-playbook ansible/playbook.yml --skip-tags restart
+    ```
 
 This will connect to the server, update the system, install Docker (and its plugins), create the `apps` user, and configure the necessary groups.
+
+
+
+## Services
+
+
+
+The following services are configured and managed by the Ansible playbook:
+
+
+
+- **Cloudflared**: Secure tunnel to expose services without opening ports.
+
+- **Muximux**: Lightweight portal for managing multiple web applications.
+
+- **Gluetun**: VPN client for secure container networking.
+
+- **NZBGet**: Efficient Usenet downloader.
+
+- **qBittorrent (VueTorrent)**: BitTorrent client with a modern web UI.
+
+- **Plex**: Media server for streaming movies, TV shows, and music.
+
+- **Plex Auto Languages**: Automated language management for Plex.
+
+- **Tautulli**: Monitoring and tracking tool for Plex Media Server.
+
+- **Prowlarr**: Indexer manager for PVR applications.
+
+- **Sonarr**: Smart TV series downloader.
+
+- **Radarr**: Movie downloader and manager.
+
+- **Bazarr**: Subtitle downloader for Sonarr and Radarr.
+
+- **FlareSolverr**: Proxy server to bypass Cloudflare challenges.
+
+- **Posterizarr**: Automated poster manager for Plex.
+
+- **MeTube**: Web GUI for youtube-dl.
+
+- **PyLoad**: Versatile download manager.
+
+- **BentoPDF**: Web-based PDF toolkit.
+
+- **ConvertX**: Self-hosted online file converter.
+
+- **IT-Tools**: Handy online tools for developers.
+
+- **RomM**: Retro ROM manager and browser.
+
+- **Tdarr**: Distributed transcode automation.
+
+- **Home Assistant**: Open-source home automation platform.
+
+- **Changedetection**: Website change monitoring and notification.
+
+- **Arcane**: Web-based Docker management UI.
+
+- **Booklore**: Self-hosted, multi-user ebook manager.
+
+- **Manyfold**: Self-hosted digital asset manager for 3D print files (Solo version).
+
+- **MariaDB**: Unified database server for multiple applications.
+
+- **Homepage**: Highly customizable dashboard for your server.
 
 
 

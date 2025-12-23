@@ -127,6 +127,21 @@ services:
         volume:
           subpath: Library
 
+  plex-auto-languages:
+    image: remirigal/plex-auto-languages:latest
+    container_name: plex-auto-languages
+    restart: always
+    environment:
+      - PLEX_URL=http://plex:32400
+      - PLEX_TOKEN=${PLEX_TOKEN}
+      - TZ=UTC
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+    volumes:
+      - ${CONFIG_DIR}/plex-auto-languages:/config
+    networks:
+      - ghostship_net
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -268,9 +283,34 @@ services:
     networks:
       - ghostship_net
 
+  pyload:
+    image: lscr.io/linuxserver/pyload-ng:latest
+    container_name: pyload
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/pyload:/config
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads/PyLoad
+    networks:
+      - ghostship_net
+
   bentopdf:
     image: bentopdf/bentopdf:latest
     container_name: bentopdf
+    restart: always
+    networks:
+      - ghostship_net
+
+  it-tools:
+    image: corentinth/it-tools:latest
+    container_name: it-tools
     restart: always
     networks:
       - ghostship_net
@@ -281,9 +321,9 @@ services:
     restart: always
     user: "{{ apps_uid }}:{{ apps_gid }}"
     environment:
-      - DB_HOST=romm-db
+      - DB_HOST=mariadb
       - DB_NAME=romm
-      - DB_USER=romm-user
+      - DB_USER=romm
       - DB_PASSWD=${ROMM_DB_PASSWORD}
       - ROMM_AUTH_SECRET_KEY=${ROMM_AUTH_SECRET}
       - IGDB_CLIENT_ID=${ROMM_IGDB_CLIENT_ID}
@@ -308,33 +348,57 @@ services:
         target: /romm/assets
         volume:
           subpath: Library/ROMs/.romm
-    ports:
-      - 8080:8080
     depends_on:
-      romm-db:
+      mariadb:
         condition: service_healthy
     networks:
       - ghostship_net
 
-  romm-db:
-    image: mariadb:latest
-    container_name: romm-db
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: mariadb
     restart: always
-    user: "{{ apps_uid }}:{{ apps_gid }}"
     environment:
-      - MARIADB_ROOT_PASSWORD=${ROMM_DB_PASSWORD}
-      - MARIADB_DATABASE=romm
-      - MARIADB_USER=romm-user
-      - MARIADB_PASSWORD=${ROMM_DB_PASSWORD}
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
     volumes:
-      - ${CONFIG_DIR}/romm-db:/var/lib/mysql
+      - ${CONFIG_DIR}/mariadb:/config
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      start_period: 30s
-      start_interval: 10s
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ghostship_net
+
+  tdarr:
+    image: ghcr.io/haveagitgat/tdarr:latest
+    container_name: tdarr
+    restart: always
+    environment:
+      - TZ=UTC
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - UMASK_SET=002
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - nodeName=tdarr-node
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ${CONFIG_DIR}/tdarr/server:/app/server
+      - ${CONFIG_DIR}/tdarr/configs:/app/configs
+      - ${CONFIG_DIR}/tdarr/logs:/app/logs
+      - ${CONFIG_DIR}/tdarr/transcode:/temp
+      - type: volume
+        source: share
+        target: /media
+        volume:
+          subpath: Library
     networks:
       - ghostship_net
 
@@ -361,6 +425,88 @@ services:
       - TZ=UTC
     volumes:
       - ${CONFIG_DIR}/changedetection:/config
+    networks:
+      - ghostship_net
+
+  arcane:
+    image: ghcr.io/getarcaneapp/arcane:latest
+    container_name: arcane
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - APP_URL=http://arcane:3552
+      - ENCRYPTION_KEY=${ARCANE_ENCRYPTION_KEY}
+      - JWT_SECRET=${ARCANE_JWT_SECRET}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${CONFIG_DIR}/arcane:/app/data
+      - ${INSTALL_DIR}:/app/data/projects
+    networks:
+      - ghostship_net
+
+  booklore:
+    image: booklore/booklore:latest
+    container_name: booklore
+    restart: always
+    environment:
+      - USER_ID={{ apps_uid }}
+      - GROUP_ID={{ apps_gid }}
+      - TZ=UTC
+      - DATABASE_URL=jdbc:mariadb://mariadb:3306/booklore
+      - DATABASE_USERNAME=booklore
+      - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
+      - BOOKLORE_PORT=6060
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - ${CONFIG_DIR}/booklore:/app/data
+      - type: volume
+        source: share
+        target: /books
+        volume:
+          subpath: Library/Books
+      - type: volume
+        source: share
+        target: /bookdrop
+        volume:
+          subpath: Library/Books/.bookdrop
+    networks:
+      - ghostship_net
+
+  manyfold:
+    image: ghcr.io/manyfold3d/manyfold-solo:latest
+    container_name: manyfold
+    restart: always
+    environment:
+      - SECRET_KEY_BASE=${MANYFOLD_SECRET_KEY}
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/manyfold:/config
+      - type: volume
+        source: share
+        target: /models
+        volume:
+          subpath: Library/3D
+    networks:
+      - ghostship_net
+
+  convertx:
+    image: ghcr.io/c4illin/convertx:latest
+    container_name: convertx
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - HTTP_ALLOWED=true
+      - ACCOUNT_REGISTRATION=false
+      - ALLOW_UNAUTHENTICATED=true
+      - HIDE_HISTORY=true
+    volumes:
+      - ${CONFIG_DIR}/convertx:/app/data
     networks:
       - ghostship_net
 

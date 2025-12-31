@@ -1,5 +1,5 @@
 # services
-- Media:
+- Calendar:
     - Calendar:
         icon: mdi-calendar
         href: "#"
@@ -9,16 +9,18 @@
             firstDayInWeek: sunday
             view: agenda
             timezone: Pacific/Honolulu
-            maxEvents: 12
+            maxEvents: 20
             integrations:
                 - type: sonarr
-                  service_group: Downloads
+                  service_group: Library
                   service_name: Sonarr
                   color: blue
                 - type: radarr
-                  service_group: Downloads
+                  service_group: Library
                   service_name: Radarr
                   color: red
+
+- Plex:
     - Plex:
         icon: plex.png
         href: "#"
@@ -30,12 +32,6 @@
             url: http://plex:32400
             key: "{{ plex_token }}"
             fields: ["streams", "movies", "tv"]
-    - Plex Auto Languages:
-        icon: plex.png
-        href: "#"
-        description: Language Manager
-        server: chill-penguin
-        container: plex-auto-languages
     - Tautulli:
         icon: tautulli.png
         href: "#"
@@ -46,66 +42,23 @@
             type: tautulli
             url: http://tautulli:8181
             key: "{{ tautulli_api_key }}"
-    - Booklore:
-        icon: booklore.png
+    - FileFlows:
+        icon: fileflows.png
         href: "#"
-        description: Ebook Manager
+        description: Video Processing
         server: chill-penguin
-        container: booklore
-    - Manyfold:
-        icon: mdi-printer-3d
+        container: fileflows
+        widget:
+            type: fileflows
+            url: http://fileflows:5000
+    - Plex Auto Languages:
+        icon: plex.png
         href: "#"
-        description: 3D Model Manager
+        description: Language Manager
         server: chill-penguin
-        container: manyfold
+        container: plex-auto-languages
 
-- Downloads:
-    - Gluetun:
-        icon: gluetun.png
-        href: "#"
-        description: VPN Client
-        server: chill-penguin
-        container: gluetun
-        widget:
-            type: gluetun
-            url: http://gluetun:8000
-    - NZBGet:
-        icon: nzbget.png
-        href: "#"
-        description: NZB Downloader
-        server: chill-penguin
-        container: nzbget
-        widget:
-            type: nzbget
-            url: http://gluetun:6789
-    - VueTorrent:
-        icon: vuetorrent.png
-        href: "#"
-        description: Torrent Downloader
-        server: chill-penguin
-        container: qbittorrent
-        widget:
-            type: qbittorrent
-            url: http://gluetun:5000
-    - PyLoad:
-        icon: pyload.png
-        href: "#"
-        description: Download Manager
-        server: chill-penguin
-        container: pyload
-        widget:
-            type: pyload
-            url: http://pyload:8000
-    - Prowlarr:
-        icon: prowlarr.png
-        href: "#"
-        description: Indexer Manager
-        server: chill-penguin
-        container: prowlarr
-        widget:
-            type: prowlarr
-            url: http://prowlarr:9696
-            key: "{{ prowlarr_api_key }}"
+- Library:
     - Sonarr:
         icon: sonarr.png
         href: "#"
@@ -126,22 +79,6 @@
             type: radarr
             url: http://radarr:7878
             key: "{{ radarr_api_key }}"
-    - Bazarr:
-        icon: bazarr.png
-        href: "#"
-        description: Subtitle Manager
-        server: chill-penguin
-        container: bazarr
-        widget:
-            type: bazarr
-            url: http://bazarr:6767
-            key: "{{ bazarr_api_key }}"
-    - Posterizarr:
-        icon: posterizarr.png
-        href: "#"
-        description: Poster Manager
-        server: chill-penguin
-        container: posterizarr
     - RomM:
         icon: romm.png
         href: "#"
@@ -151,40 +88,72 @@
         widget:
             type: romm
             url: http://romm:8080
-    - Tdarr:
-        icon: tdarr.png
+    - Booklore:
+        icon: sh-booklore
         href: "#"
-        description: Transcoding
+        description: Ebook Manager
         server: chill-penguin
-        container: tdarr
-        widget:
-            type: tdarr
-            url: http://tdarr:8265
+        container: booklore
+    - Manyfold:
+        icon: manyfold.png
+        href: "#"
+        description: 3D Model Manager
+        server: chill-penguin
+        container: manyfold
+    - Huntarr:
+        icon: huntarr.png
+        href: "#"
+        description: Content Searcher
+        server: chill-penguin
+        container: huntarr
 
-- System:
-    - Cloudflared:
-        icon: cloudflare.png
+- Downloads:
+    - Gluetun:
+        icon: gluetun.png
         href: "#"
-        description: Cloudflare Tunnel
+        description: VPN Client
         server: chill-penguin
-        container: cloudflared
+        container: gluetun
         widget:
-            type: cloudflared
-            accountid: "{{ cloudflared_account_id }}"
-            tunnelid: "{{ cloudflared_tunnel_id }}"
-            key: "{{ cloudflared_api_token }}"
-    - Muximux:
-        icon: hubitat.png
+            type: gluetun
+            url: http://gluetun:8000
+    - SABnzbd:
+        icon: sabnzbd.png
         href: "#"
-        description: Lightweight Portal
+        description: NZB Downloader
         server: chill-penguin
-        container: muximux
-    - Homepage:
-        icon: homepage.png
+        container: sabnzbd
+        widget:
+            type: sabnzbd
+            url: http://gluetun:8080
+            key: "{{ sabnzbd_api_key }}"
+    - VueTorrent:
+        icon: vuetorrent.png
         href: "#"
-        description: Dashboard
+        description: Torrent Downloader
         server: chill-penguin
-        container: homepage
+        container: qbittorrent
+        widget:
+            type: qbittorrent
+            url: http://gluetun:5000
+
+- Utilities:
+    - Prowlarr:
+        icon: prowlarr.png
+        href: "#"
+        description: Indexer Manager
+        server: chill-penguin
+        container: prowlarr
+        widget:
+            type: prowlarr
+            url: http://prowlarr:9696
+            key: "{{ prowlarr_api_key }}"
+    - FlareSolverr:
+        icon: flaresolverr.png
+        href: "#"
+        description: Proxy Server
+        server: chill-penguin
+        container: flaresolverr
     - BentoPDF:
         icon: bentopdf.png
         href: "#"
@@ -204,17 +173,95 @@
         server: chill-penguin
         container: it-tools
     - MeTube:
-        icon: youtube.png
+        icon: metube.png
         href: "#"
         description: YouTube Downloader
         server: chill-penguin
         container: metube
-    - FlareSolverr:
-        icon: flaresolverr.png
+
+- Automation:
+    - Bazarr:
+        icon: bazarr.png
         href: "#"
-        description: Proxy Server
+        description: Subtitle Manager
         server: chill-penguin
-        container: flaresolverr
+        container: bazarr
+        widget:
+            type: bazarr
+            url: http://bazarr:6767
+            key: "{{ bazarr_api_key }}"
+    - Changedetection:
+        icon: changedetection.png
+        href: "#"
+        description: Website Monitor
+        server: chill-penguin
+        container: changedetection
+        widget:
+            type: changedetectionio
+            url: http://changedetection:5000
+    - Recyclarr:
+        icon: recyclarr.png
+        href: "#"
+        description: Trash Guides Sync
+        server: chill-penguin
+        container: recyclarr
+    - Activepieces:
+        icon: activepieces.png
+        href: "#"
+        description: Automation Tool
+        server: chill-penguin
+        container: activepieces
+    - Zerobyte:
+        icon: zerobyte.png
+        href: "#"
+        description: Backup Automation
+        server: chill-penguin
+        container: zerobyte
+    - Warracker:
+        icon: warracker.png
+        href: "#"
+        description: Warranty Tracker
+        server: chill-penguin
+        container: warracker
+
+- Management:
+    - Cloudflared:
+        icon: cloudflare.png
+        href: "#"
+        description: Cloudflare Tunnel
+        server: chill-penguin
+        container: cloudflared
+        widget:
+            type: cloudflared
+            accountid: "{{ cloudflared_account_id }}"
+            tunnelid: "{{ cloudflared_tunnel_id }}"
+            key: "{{ cloudflared_api_token }}"
+    - Homepage:
+        icon: homepage.png
+        href: "#"
+        description: Dashboard
+        server: chill-penguin
+        container: homepage
+    - Muximux:
+        icon: mdi-view-dashboard-#00c853
+        href: "#"
+        description: Lightweight Portal
+        server: chill-penguin
+        container: muximux
+    - Arcane:
+        icon: arcane.png
+        href: "#"
+        description: Docker Management
+        server: chill-penguin
+        container: arcane
+    - Docker Autoheal:
+        icon: docker.png
+        href: "#"
+        description: Container Monitor
+        server: chill-penguin
+        container: docker-autoheal
+
+- Infrastructure:
     - Home Assistant:
         icon: home-assistant.png
         href: "#"
@@ -225,24 +272,21 @@
             type: homeassistant
             url: http://homeassistant:8123
             key: "{{ homeassistant_token }}"
-
-    - Changedetection:
-        icon: changedetection.png
+    - RomM DB:
+        icon: mariadb.png
         href: "#"
-        description: Website Monitor
+        description: RomM Database
         server: chill-penguin
-        container: changedetection
-        widget:
-            type: changedetectionio
-            url: http://changedetection:5000
-    - Arcane:
-        icon: mdi-docker
+        container: romm-db
+    - Booklore DB:
+        icon: mariadb.png
         href: "#"
-        description: Docker Management
+        description: Booklore Database
         server: chill-penguin
-        container: arcane
-        widget:
-            type: arcane
-            url: http://arcane:3552
-
-- Spacer: []
+        container: booklore-db
+    - Warracker DB:
+        icon: postgresql.png
+        href: "#"
+        description: Warracker Database
+        server: chill-penguin
+        container: warracker-db

@@ -107,37 +107,47 @@
         - "{{ config_dir }}/plex"
         - "{{ config_dir }}/plex-auto-languages"
         - "{{ config_dir }}/tautulli"
-        - "{{ config_dir }}/posterizarr"
-        - "{{ config_dir }}/posterizarr/assets"
-        - "{{ config_dir }}/posterizarr/assetsbackup"
-        - "{{ config_dir }}/posterizarr/manualassets"
-        - "{{ config_dir }}/nzbget"
+        - "{{ config_dir }}/sabnzbd"
+        - "{{ config_dir }}/sabnzbd/scripts"
         - "{{ config_dir }}/qbittorrent"
         - "{{ config_dir }}/prowlarr"
         - "{{ config_dir }}/sonarr"
         - "{{ config_dir }}/radarr"
+        - "{{ config_dir }}/recyclarr"
+        - "{{ config_dir }}/huntarr"
         - "{{ config_dir }}/bazarr"
         - "{{ config_dir }}/muximux"
         - "{{ config_dir }}/gluetun"
         - "{{ config_dir }}/homeassistant"
         - "{{ config_dir }}/changedetection"
-        - "{{ config_dir }}/pyload"
         - "{{ config_dir }}/it-tools"
         - "{{ config_dir }}/romm"
         - "{{ config_dir }}/romm/resources"
         - "{{ config_dir }}/romm/redis-data"
         - "{{ config_dir }}/romm/config"
-        - "{{ config_dir }}/mariadb"
-        - "{{ config_dir }}/mariadb/initdb.d"
-        - "{{ config_dir }}/tdarr"
-        - "{{ config_dir }}/tdarr/server"
-        - "{{ config_dir }}/tdarr/configs"
-        - "{{ config_dir }}/tdarr/logs"
-        - "{{ config_dir }}/tdarr/transcode"
+        - "{{ config_dir }}/romm-db"
         - "{{ config_dir }}/booklore"
+        - "{{ config_dir }}/booklore-db"
+        - "{{ config_dir }}/warracker"
+        - "{{ config_dir }}/warracker/data"
+        - "{{ config_dir }}/warracker/uploads"
+        - "{{ config_dir }}/warracker-db"
         - "{{ config_dir }}/manyfold"
         - "{{ config_dir }}/convertx"
         - "{{ config_dir }}/arcane"
+        - "{{ config_dir }}/activepieces"
+        - "{{ config_dir }}/zerobyte"
+
+    - name: Create Muximux web directories with 775 permissions
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0775'
+      loop:
+        - "{{ config_dir }}/muximux/www"
+        - "{{ config_dir }}/muximux/www/muximux"
 
     - name: Create homepage config directory
       file:
@@ -167,13 +177,14 @@
       notify: Restart Docker Compose
       register: compose_deploy
 
-    - name: Deploy MariaDB init script
+    - name: Deploy Muximux config
       template:
-        src: mariadb/init.sql.j2
-        dest: "{{ config_dir }}/mariadb/initdb.d/init.sql"
+        src: muximux/settings.ini.php.j2
+        dest: "{{ config_dir }}/muximux/www/muximux/settings.ini.php"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
         mode: '0644'
+      notify: Restart Docker Compose
 
     - name: Deploy RomM config
       template:
@@ -184,6 +195,14 @@
         mode: '0644'
       notify: Restart Docker Compose
 
+    - name: Deploy Recyclarr config
+      template:
+        src: recyclarr/recyclarr.yml.j2
+        dest: "{{ config_dir }}/recyclarr/recyclarr.yml"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0644'
+      notify: Restart Docker Compose
 
     - name: Deploy Plex Auto Languages config
       template:
@@ -296,52 +315,78 @@
       when: item.stat.exists
       notify: Restart Arr Services
 
+    - name: Check if sabnzbd.ini exists
+      stat:
+        path: "{{ config_dir }}/sabnzbd/sabnzbd.ini"
+      register: sabnzbd_ini
+
+    - name: Configure host_whitelist in sabnzbd.ini
+      community.general.ini_file:
+        path: "{{ config_dir }}/sabnzbd/sabnzbd.ini"
+        section: misc
+        option: host_whitelist
+        value: "{{ sabnzbd_host_whitelist }}"
+      when: sabnzbd_ini.stat.exists and sabnzbd_host_whitelist != ''
+      notify: Restart Docker Compose
+
+    - name: Deploy SABnzbd scripts
+      template:
+        src: "sabnzbd/scripts/{{ item }}.j2"
+        dest: "{{ config_dir }}/sabnzbd/scripts/{{ item }}"
+        owner: "{{ apps_user }}"
+        group: "{{ apps_user }}"
+        mode: '0755'
+      loop:
+        - clean.py
+        - replace_for.py
+      notify: Restart Docker Compose
+
   handlers:
     - name: Restart Docker Compose
       shell: docker compose down && docker compose up -d
       args:
         chdir: "{{ install_dir }}"
-      tags: restart
+      tags: [restart]
 
     - name: Restart MariaDB
       shell: docker compose restart mariadb
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
-      tags: restart
+      tags: [restart]
 
     - name: Restart Homepage
       shell: docker compose restart homepage
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
-      tags: restart
+      tags: [restart]
 
     - name: Restart Plex
       shell: docker compose restart plex
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
-      tags: restart
+      tags: [restart]
 
     - name: Restart Arr Services
       shell: docker compose restart prowlarr sonarr radarr bazarr
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
-      tags: restart
+      tags: [restart]
 
     - name: Restart Home Assistant
       shell: docker compose restart homeassistant
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
-      tags: restart
+      tags: [restart]
 
     - name: Restart Plex Auto Languages
       shell: docker compose restart plex-auto-languages
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
-      tags: restart
+      tags: [restart]
       

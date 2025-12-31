@@ -189,9 +189,10 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     export CLOUDFLARED_TUNNEL_ID="your_cloudflared_tunnel_id" # Found in Zero Trust > Networks > Tunnels
     export CLOUDFLARED_API_TOKEN="your_cloudflared_api_token" # Requires 'Account:Cloudflare Tunnel:Read' permissions
 
-    # VPN Configuration
-    export WIREGUARD_PRIVATE_KEY="your_wireguard_private_key"
-    export VPN_COUNTRY="your_country" # Optional: e.g. "United States" for closest server
+    # VPN Configuration (PIA)
+    export VPN_PIA_USER="your_pia_username"
+    export VPN_PIA_PASS="your_pia_password"
+    export VPN_PIA_REGION="CA Vancouver" # Optional: defaults to CA Vancouver
 
     # Plex Configuration
     export PLEX_CLAIM="your_plex_claim_token"
@@ -212,6 +213,10 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     # Bazarr Configuration
     export BAZARR_API_KEY="your_bazarr_api_key" # For Homepage Bazarr widget
 
+    # SABnzbd Configuration
+    export SABNZBD_API_KEY="your_sabnzbd_api_key" # For Homepage SABnzbd widget
+    export SABNZBD_HOST_WHITELIST="sabnzbd.example.com, 192.168.1.2" # Optional: host whitelist for SABnzbd
+
     # Home Assistant Configuration
     export HOMEASSISTANT_TOKEN="your_homeassistant_long_lived_access_token"
     
@@ -231,9 +236,17 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     
     # Booklore Configuration (Optional)
     # export BOOKLORE_DB_PASSWORD="your_secure_password" # Auto-generated if missing
+
+    # Warracker Configuration (Optional)
+    # export WARRACKER_DB_PASSWORD="your_secure_password" # Auto-generated if missing
+    # export WARRACKER_SECRET_KEY="your_secret_key" # Auto-generated if missing
         
     # Manyfold Configuration (Optional)
     # export MANYFOLD_SECRET_KEY="your_random_64_char_key" # Auto-generated if missing
+
+    # Activepieces Configuration (Optional)
+    export ACTIVEPIECES_FRONTEND_URL="https://activepieces.ghostship.io/"
+
     ```
 
 2.  Run the playbook from the project root:
@@ -265,7 +278,7 @@ The following services are configured and managed by the Ansible playbook:
 
 - **Gluetun**: VPN client for secure container networking.
 
-- **NZBGet**: Efficient Usenet downloader.
+- **SABnzbd**: Efficient Usenet downloader.
 
 - **qBittorrent (VueTorrent)**: BitTorrent client with a modern web UI.
 
@@ -283,13 +296,13 @@ The following services are configured and managed by the Ansible playbook:
 
 - **Bazarr**: Subtitle downloader for Sonarr and Radarr.
 
+- **Huntarr**: Systematic content searcher for Radarr and Sonarr.
+
+- **Recyclarr**: Automated synchronization of TRaSH Guides to Sonarr and Radarr.
+
 - **FlareSolverr**: Proxy server to bypass Cloudflare challenges.
 
-- **Posterizarr**: Automated poster manager for Plex.
-
 - **MeTube**: Web GUI for youtube-dl.
-
-- **PyLoad**: Versatile download manager.
 
 - **BentoPDF**: Web-based PDF toolkit.
 
@@ -297,15 +310,23 @@ The following services are configured and managed by the Ansible playbook:
 
 - **IT-Tools**: Handy online tools for developers.
 
+- **Warracker**: Self-hosted warranty tracking application.
+
 - **RomM**: Retro ROM manager and browser.
 
-- **Tdarr**: Distributed transcode automation.
+- **FileFlows**: Video processing and automation.
 
 - **Home Assistant**: Open-source home automation platform.
 
-- **Changedetection**: Website change monitoring and notification.
+- Changedetection: Website change monitoring and notification.
 
-- **Arcane**: Web-based Docker management UI.
+- Arcane: Web-based Docker management UI.
+
+- Docker Autoheal: Monitor and restart unhealthy Docker containers.
+
+- Activepieces: Open source no-code business automation.
+
+- **Zerobyte**: Backup automation tool.
 
 - **Booklore**: Self-hosted, multi-user ebook manager.
 

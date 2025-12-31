@@ -34,11 +34,13 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
-      - VPN_SERVICE_PROVIDER=surfshark
-      - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - WIREGUARD_ADDRESSES=10.14.0.2/16
-      - SERVER_COUNTRIES=${VPN_COUNTRY}
+      - VPN_SERVICE_PROVIDER=private internet access
+      - SERVER_REGIONS=${VPN_PIA_REGION}
+      - OPENVPN_USER=${VPN_PIA_USER}
+      - OPENVPN_PASSWORD=${VPN_PIA_PASS}
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{ '{{' }}PORT{{ '}}' }},\"current_network_interface\":\"{{ '{{' }}VPN_INTERFACE{{ '}}' }}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:5000/api/v2/app/setPreferences 2>&1'
+      - VPN_PORT_FORWARDING_DOWN_COMMAND=/bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://127.0.0.1:5000/api/v2/app/setPreferences 2>&1'
       - TZ=UTC
       - UPDATER_PERIOD=24h
     volumes:
@@ -52,16 +54,16 @@ services:
     networks:
       - ghostship_net
 
-  nzbget:
-    image: lscr.io/linuxserver/nzbget:latest
-    container_name: nzbget
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
     restart: always
     environment:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
       - TZ=UTC
     volumes:
-      - ${CONFIG_DIR}/nzbget:/config
+      - ${CONFIG_DIR}/sabnzbd:/config
       - type: volume
         source: share
         target: /downloads
@@ -224,6 +226,31 @@ services:
     networks:
       - ghostship_net
 
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - TZ=UTC
+      - CRON_SCHEDULE=@daily
+    volumes:
+      - ${CONFIG_DIR}/recyclarr:/config
+    networks:
+      - ghostship_net
+
+  huntarr:
+    image: ghcr.io/plexguide/huntarr:latest
+    container_name: huntarr
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/huntarr:/config
+    networks:
+      - ghostship_net
+
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
@@ -231,25 +258,6 @@ services:
     environment:
       - TZ=UTC
       - LOG_LEVEL=info
-    networks:
-      - ghostship_net
-
-  posterizarr:
-    image: ghcr.io/fscorrupt/posterizarr:latest
-    container_name: posterizarr
-    restart: always
-    user: "{{ apps_uid }}:{{ apps_gid }}"
-    environment:
-      - PUID={{ apps_uid }}
-      - PGID={{ apps_gid }}
-      - TZ=UTC
-      - TERM=xterm
-      - RUN_TIME=disabled
-    volumes:
-      - ${CONFIG_DIR}/posterizarr:/config
-      - ${CONFIG_DIR}/posterizarr/assets:/assets
-      - ${CONFIG_DIR}/posterizarr/assetsbackup:/assetsbackup
-      - ${CONFIG_DIR}/posterizarr/manualassets:/manualassets
     networks:
       - ghostship_net
 
@@ -283,24 +291,6 @@ services:
     networks:
       - ghostship_net
 
-  pyload:
-    image: lscr.io/linuxserver/pyload-ng:latest
-    container_name: pyload
-    restart: always
-    environment:
-      - PUID={{ apps_uid }}
-      - PGID={{ apps_gid }}
-      - TZ=UTC
-    volumes:
-      - ${CONFIG_DIR}/pyload:/config
-      - type: volume
-        source: share
-        target: /downloads
-        volume:
-          subpath: Downloads/PyLoad
-    networks:
-      - ghostship_net
-
   bentopdf:
     image: bentopdf/bentopdf:latest
     container_name: bentopdf
@@ -321,7 +311,7 @@ services:
     restart: always
     user: "{{ apps_uid }}:{{ apps_gid }}"
     environment:
-      - DB_HOST=mariadb
+      - DB_HOST=romm-db
       - DB_NAME=romm
       - DB_USER=romm
       - DB_PASSWD=${ROMM_DB_PASSWORD}
@@ -349,8 +339,31 @@ services:
         volume:
           subpath: Library/ROMs/.romm
     depends_on:
-      mariadb:
+      romm-db:
         condition: service_healthy
+    networks:
+      - ghostship_net
+
+  romm-db:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: romm-db
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - MYSQL_ROOT_HOST=127.0.0.1
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=romm
+      - MYSQL_USER=romm
+      - MYSQL_PASSWORD=${ROMM_DB_PASSWORD}
+    volumes:
+      - ${CONFIG_DIR}/romm-db:/config
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ghostship_net
 
@@ -372,28 +385,20 @@ services:
     networks:
       - ghostship_net
 
-  tdarr:
-    image: ghcr.io/haveagitgat/tdarr:latest
-    container_name: tdarr
+  fileflows:
+    image: revenz/fileflows:latest
+    container_name: fileflows
     restart: always
     environment:
-      - TZ=UTC
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
-      - UMASK_SET=002
-      - serverIP=0.0.0.0
-      - serverPort=8266
-      - webUIPort=8265
-      - internalNode=true
-      - inContainer=true
-      - nodeName=tdarr-node
+      - TZ=UTC
     devices:
       - /dev/dri:/dev/dri
     volumes:
-      - ${CONFIG_DIR}/tdarr/server:/app/server
-      - ${CONFIG_DIR}/tdarr/configs:/app/configs
-      - ${CONFIG_DIR}/tdarr/logs:/app/logs
-      - ${CONFIG_DIR}/tdarr/transcode:/temp
+      - ${CONFIG_DIR}/fileflows/data:/app/Data
+      - ${CONFIG_DIR}/fileflows/logs:/app/Logs
+      - ${CONFIG_DIR}/fileflows/temp:/temp
       - type: volume
         source: share
         target: /media
@@ -410,6 +415,7 @@ services:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
       - TZ=UTC
+      - DOCKER_MODS=linuxserver/mods:homeassistant-hacs
     volumes:
       - ${CONFIG_DIR}/homeassistant:/config
     networks:
@@ -446,6 +452,37 @@ services:
     networks:
       - ghostship_net
 
+  activepieces:
+    image: activepieces/activepieces:latest
+    container_name: activepieces
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - AP_REDIS_TYPE=MEMORY
+      - AP_DB_TYPE=SQLITE3
+      - AP_FRONTEND_URL=${ACTIVEPIECES_FRONTEND_URL}
+    volumes:
+      - ${CONFIG_DIR}/activepieces:/root/.activepieces
+    networks:
+      - ghostship_net
+
+  zerobyte:
+    image: ghcr.io/nicotsx/zerobyte:latest
+    container_name: zerobyte
+    restart: always
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse:/dev/fuse
+    environment:
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/zerobyte:/var/lib/zerobyte
+    networks:
+      - ghostship_net
+
   booklore:
     image: booklore/booklore:latest
     container_name: booklore
@@ -454,12 +491,12 @@ services:
       - USER_ID={{ apps_uid }}
       - GROUP_ID={{ apps_gid }}
       - TZ=UTC
-      - DATABASE_URL=jdbc:mariadb://mariadb:3306/booklore
+      - DATABASE_URL=jdbc:mariadb://booklore-db:3306/booklore
       - DATABASE_USERNAME=booklore
       - DATABASE_PASSWORD=${BOOKLORE_DB_PASSWORD}
       - BOOKLORE_PORT=6060
     depends_on:
-      mariadb:
+      booklore-db:
         condition: service_healthy
     volumes:
       - ${CONFIG_DIR}/booklore:/app/data
@@ -473,6 +510,75 @@ services:
         target: /bookdrop
         volume:
           subpath: Library/Books/.bookdrop
+    networks:
+      - ghostship_net
+
+  booklore-db:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: booklore-db
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - MYSQL_ROOT_HOST=127.0.0.1
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=booklore
+      - MYSQL_USER=booklore
+      - MYSQL_PASSWORD=${BOOKLORE_DB_PASSWORD}
+    volumes:
+      - ${CONFIG_DIR}/booklore-db:/config
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ghostship_net
+
+  warracker:
+    image: ghcr.io/sassanix/warracker/main:latest
+    container_name: warracker
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - DB_HOST=warracker-db
+      - DB_PORT=5432
+      - DB_NAME=warracker
+      - DB_USER=warracker
+      - DB_PASSWORD=${WARRACKER_DB_PASSWORD}
+      - SECRET_KEY=${WARRACKER_SECRET_KEY}
+      - WARRACKER_MEMORY_MODE=optimized
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ${CONFIG_DIR}/warracker/data:/app/data
+      - ${CONFIG_DIR}/warracker/uploads:/app/uploads
+    depends_on:
+      warracker-db:
+        condition: service_healthy
+    networks:
+      - ghostship_net
+
+  warracker-db:
+    image: postgres:16-alpine
+    container_name: warracker-db
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - POSTGRES_DB=warracker
+      - POSTGRES_USER=warracker
+      - POSTGRES_PASSWORD=${WARRACKER_DB_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ${CONFIG_DIR}/warracker-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ghostship_net
 
@@ -522,6 +628,18 @@ services:
       - HOMEPAGE_ALLOWED_HOSTS=*
     volumes:
       - ${CONFIG_DIR}/homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ghostship_net
+
+  docker-autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: docker-autoheal
+    restart: always
+    user: "{{ apps_uid }}:{{ docker_gid }}"
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - ghostship_net

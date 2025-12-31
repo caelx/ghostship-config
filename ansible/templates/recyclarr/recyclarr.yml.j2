@@ -48,19 +48,17 @@ sonarr:
           - c9eafd50846d299b862ca9bb6ea91950 # x265
         assign_scores_to:
           - name: Optimal
-            score: 300
+            score: 2000
       - trash_ids:
           - cddfb4e32db826151d97352b8e37c648 # x264
         assign_scores_to:
           - name: Optimal
-            score: 200
+            score: 1000
       - trash_ids:
           - 15a05bc7c1a36e2b57fd628f8977e2fc # AV1
           - 041d90b435ebd773271cea047a457a6a # x266
           - 85c61753df5da1fb2aab6f2a47426b09 # BR-DISK
           - fbcb31d8dabd2a319072b84fc0b7249c # Extras
-          - 9c11cd3f07101cdba90a2d81cf0e56b4 # LQ
-          - e2315f990da2e2cbfc9fa5b7a6fcfe48 # LQ (Release Title)
           - 23297a736ca77c0fc8e70f8edd7ee56c # Upscaled
           - 7470a681e6205243983c4410ee4c920f # VC-1
           - 90501962793d580d011511155c97e4e5 # VP9
@@ -81,12 +79,12 @@ sonarr:
           - 3fbafa924f361e66fbc6187af82dfa85 # 5.1 Surround
         assign_scores_to:
           - name: Optimal
-            score: 100
+            score: 500
       - trash_ids:
           - 834e534f103938853ffced4203b53e72 # 2.0 Stereo
         assign_scores_to:
           - name: Optimal
-            score: 50
+            score: 400
       - trash_ids:
           - bd6dd5e043aa27ff4696a08d011c7d96 # 1.0 Mono
           - 42cba7e38c7947a6d1d0a62580ee6d62 # 3.0 Sound
@@ -189,9 +187,11 @@ sonarr:
       - trash_ids:
           - e3515e519f3b1360cbfc17651944354c # Anime LQ Groups
           - b4a1b3d705159cdca36d71e57ca86871 # Anime Raws
+          - 9c11cd3f07101cdba90a2d81cf0e56b4 # LQ
+          - e2315f990da2e2cbfc9fa5b7a6fcfe48 # LQ (Release Title)
         assign_scores_to:
           - name: Optimal
-            score: -500
+            score: -100
 
       # Language
       - trash_ids:
@@ -277,12 +277,12 @@ radarr:
           - 9170d55c319f4fe40da8711ba9d8050d # x265
         assign_scores_to:
           - name: Optimal
-            score: 300
+            score: 2000
       - trash_ids:
           - 2899d84dc9372de3408e6d8cc18e9666 # x264
         assign_scores_to:
           - name: Optimal
-            score: 200
+            score: 1000
       - trash_ids:
           - b8cd450cbfa689c0259a01d9e29ba3d6 # 3D
           - cae4ca30163749b891686f95532519bd # AV1
@@ -290,8 +290,6 @@ radarr:
           - ed38b889b31be83fda192888e2286d83 # BR-DISK
           - 0a3f082873eb454bde444150b70253cc # Extras
           - e6886871085226c3da1830830146846c # Generated Dynamic HDR
-          - 90a6f9a284dff5103f6346090e6280c8 # LQ
-          - e204b80c87be9497a8a6eaff48f72905 # LQ (Release Title)
           - 712d74cd88bceb883ee32f773656b1f5 # Sing-Along Versions
           - bfd8eb01832d646a0a89c4deb46f8564 # Upscaled
           - 11cd1db7165d6a7ad9a83bc97b8b1060 # VC-1
@@ -313,12 +311,12 @@ radarr:
           - 77ff61788dfe1097194fd8743d7b4524 # 5.1 Surround
         assign_scores_to:
           - name: Optimal
-            score: 100
+            score: 500
       - trash_ids:
           - 89dac1be53d5268a7e10a19d3c896826 # 2.0 Stereo
         assign_scores_to:
           - name: Optimal
-            score: 50
+            score: 400
       - trash_ids:
           - b124be9b146540f8e62f98fe32e49a2a # 1.0 Mono
           - 205125755c411c3b8622ca3175d27b37 # 3.0 Sound
@@ -384,6 +382,8 @@ radarr:
           - eecf3a857724171f968a66cb5719e152 # IMAX
           - 9f6cbff8cfe4ebbc1bde14c7b7bec0de # IMAX Enhanced
           - e9001909a4c88013a359d0b9920d7bea # Theatrical Cut
+          - 90a6f9a284dff5103f6346090e6280c8 # LQ
+          - e204b80c87be9497a8a6eaff48f72905 # LQ (Release Title)
         assign_scores_to:
           - name: Optimal
             score: -100
@@ -448,7 +448,7 @@ radarr:
           - 06b6542a47037d1e33b15aa3677c2365 # Anime Raws
         assign_scores_to:
           - name: Optimal
-            score: -500
+            score: -100
 
       # Language
       - trash_ids:

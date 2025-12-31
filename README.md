@@ -320,6 +320,8 @@ The following services are configured and managed by the Ansible playbook:
 
 - Changedetection: Website change monitoring and notification.
 
+- **Sockpuppet Browser**: Headless Chrome browser for scraping.
+
 - Arcane: Web-based Docker management UI.
 
 - Docker Autoheal: Monitor and restart unhealthy Docker containers.

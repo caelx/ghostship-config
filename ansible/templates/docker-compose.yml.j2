@@ -68,7 +68,7 @@ services:
         source: share
         target: /downloads
         volume:
-          subpath: Downloads/Usenet
+          subpath: Downloads
     network_mode: service:gluetun
     depends_on:
       gluetun:
@@ -90,7 +90,7 @@ services:
         source: share
         target: /downloads
         volume:
-          subpath: Downloads/Torrent
+          subpath: Downloads
     network_mode: service:gluetun
     depends_on:
       gluetun:
@@ -429,8 +429,26 @@ services:
       - PUID={{ apps_uid }}
       - PGID={{ apps_gid }}
       - TZ=UTC
+      - PLAYWRIGHT_DRIVER_URL=ws://browser-sockpuppet-chrome:3000
     volumes:
       - ${CONFIG_DIR}/changedetection:/config
+    networks:
+      - ghostship_net
+    depends_on:
+      - browser-sockpuppet-chrome
+
+  browser-sockpuppet-chrome:
+    image: dgtlmoon/sockpuppetbrowser:latest
+    container_name: browser-sockpuppet-chrome
+    hostname: browser-sockpuppet-chrome
+    restart: always
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1024
+      - SCREEN_DEPTH=16
+      - MAX_CONCURRENT_CHROME_PROCESSES=10
     networks:
       - ghostship_net
 

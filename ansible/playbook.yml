@@ -7,10 +7,10 @@
 
   tasks:
     - name: Ensure system is updated (including Asahi Linux specific packages)
-      dnf:
+      ansible.builtin.dnf: # noqa package-latest
         name: "*"
         state: latest
-        update_cache: yes
+        update_cache: true
 
     - name: Check if Cockpit service exists
       ansible.builtin.stat:
@@ -18,31 +18,31 @@
       register: cockpit_service_file
 
     - name: Stop and disable Cockpit service
-      systemd:
+      ansible.builtin.systemd:
         name: cockpit.socket
         state: stopped
-        enabled: no
+        enabled: false
       when: cockpit_service_file.stat.exists
 
     - name: Remove Cockpit package
-      dnf:
+      ansible.builtin.dnf:
         name: cockpit
         state: absent
 
     - name: Stop and disable Avahi daemon
-      systemd:
+      ansible.builtin.systemd:
         name: avahi-daemon
         state: stopped
-        enabled: no
+        enabled: false
 
     - name: Download Docker CE repo file
-      get_url:
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/fedora/docker-ce.repo
         dest: /etc/yum.repos.d/docker-ce.repo
-        mode: '0644'
+        mode: "0644"
 
     - name: Install required packages
-      dnf:
+      ansible.builtin.dnf:
         name:
           - dnf-plugins-core # Required for managing DNF repositories
           - docker-ce # Docker Engine - Community
@@ -52,55 +52,55 @@
           - docker-compose-plugin # Docker Compose V2
           - python3-lxml # Required for Ansible xml module to configure service XML files
           - git # Required for cloning repositories
-        state: latest
+        state: present
 
     - name: Ensure Docker service is started and enabled
-      systemd:
+      ansible.builtin.systemd:
         name: docker
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Create 'apps' service account
-      user:
+      ansible.builtin.user:
         name: "{{ apps_user }}"
         shell: /bin/bash
-        create_home: yes
-        system: yes
-        password_lock: yes
+        create_home: true
+        system: true
+        password_lock: true
         groups: docker
-        append: no
+        append: false
 
     - name: Add ansible user to docker group
-      user:
+      ansible.builtin.user:
         name: "{{ ansible_user }}"
         groups: docker
-        append: yes
+        append: true
 
     - name: Get 'apps' user info
-      getent:
+      ansible.builtin.getent:
         database: passwd
         key: "{{ apps_user }}"
       register: apps_user_info
 
     - name: Get 'docker' group info
-      getent:
+      ansible.builtin.getent:
         database: group
         key: docker
       register: docker_group_info
 
     - name: Set apps_uid, apps_gid and docker_gid facts
-      set_fact:
+      ansible.builtin.set_fact:
         apps_uid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][1] }}"
         apps_gid: "{{ apps_user_info.ansible_facts.getent_passwd[apps_user][2] }}"
         docker_gid: "{{ docker_group_info.ansible_facts.getent_group['docker'][1] }}"
 
     - name: Create app directories
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0755'
+        mode: "0755"
       loop:
         - "{{ install_dir }}"
         - "{{ config_dir }}"
@@ -139,94 +139,94 @@
         - "{{ config_dir }}/zerobyte"
 
     - name: Create Muximux web directories with 775 permissions
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0775'
+        mode: "0775"
       loop:
         - "{{ config_dir }}/muximux/www"
         - "{{ config_dir }}/muximux/www/muximux"
 
     - name: Create homepage config directory
-      file:
+      ansible.builtin.file:
         path: "{{ config_dir }}/homepage"
         state: directory
         owner: "{{ apps_user }}"
         group: docker
-        mode: '0755'
+        mode: "0755"
 
     - name: Deploy .env file
-      template:
+      ansible.builtin.template:
         src: .env.j2
         dest: "{{ install_dir }}/.env"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0600'
+        mode: "0600"
       notify: Restart Docker Compose
       register: env_deploy
 
     - name: Deploy docker-compose.yml
-      template:
+      ansible.builtin.template:
         src: docker-compose.yml.j2
         dest: "{{ install_dir }}/docker-compose.yml"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0644'
+        mode: "0644"
       notify: Restart Docker Compose
       register: compose_deploy
 
     - name: Deploy Muximux config
-      template:
+      ansible.builtin.template:
         src: muximux/settings.ini.php.j2
         dest: "{{ config_dir }}/muximux/www/muximux/settings.ini.php"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0644'
+        mode: "0644"
       notify: Restart Docker Compose
 
     - name: Deploy RomM config
-      template:
+      ansible.builtin.template:
         src: romm/config.yml.j2
         dest: "{{ config_dir }}/romm/config/config.yml"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0644'
+        mode: "0644"
       notify: Restart Docker Compose
 
     - name: Deploy Recyclarr config
-      template:
+      ansible.builtin.template:
         src: recyclarr/recyclarr.yml.j2
         dest: "{{ config_dir }}/recyclarr/recyclarr.yml"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0644'
+        mode: "0644"
       notify: Restart Docker Compose
 
     - name: Deploy Plex Auto Languages config
-      template:
+      ansible.builtin.template:
         src: plex-auto-languages/config.yaml.j2
         dest: "{{ config_dir }}/plex-auto-languages/config.yaml"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0644'
+        mode: "0644"
       notify: Restart Plex Auto Languages
 
     - name: Ensure Docker Compose stack is running
-      shell: docker compose up -d
+      ansible.builtin.command: docker compose up -d
       args:
         chdir: "{{ install_dir }}"
       register: docker_compose_output
       changed_when: "docker_compose_output.stderr is search('Recreating|Created|Started')"
 
     - name: Deploy homepage config files
-      template:
+      ansible.builtin.template:
         src: "homepage/{{ item }}.j2"
         dest: "{{ config_dir }}/homepage/{{ item }}"
         owner: "{{ apps_user }}"
         group: docker
-        mode: '0644'
+        mode: "0644"
       loop:
         - bookmarks.yaml
         - services.yaml
@@ -236,16 +236,16 @@
       notify: Restart Homepage
 
     - name: Check if Home Assistant configuration.yaml exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ config_dir }}/homeassistant/configuration.yaml"
       register: ha_config
 
     - name: Configure Home Assistant HTTP settings
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ config_dir }}/homeassistant/configuration.yaml"
         marker: "# {mark} ANSIBLE MANAGED BLOCK - HTTP CONFIG"
         block: |
-          
+
           http:
             use_x_forwarded_for: true
             trusted_proxies:
@@ -256,29 +256,32 @@
       notify: Restart Home Assistant
 
     - name: Check if Plex Preferences.xml exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Preferences.xml"
       register: plex_prefs
 
     - name: Ensure Plex Plug-ins directory exists
-      file:
+      ansible.builtin.file:
         path: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Plug-ins"
         state: directory
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0755'
+        mode: "0755"
       when: plex_prefs.stat.exists
 
     - name: Install Plex Plugins
-      git:
+      ansible.builtin.git:
         repo: "{{ item.repo }}"
         dest: "{{ config_dir }}/plex/Library/Application Support/Plex Media Server/Plug-ins/{{ item.name }}"
         version: master
-        update: yes
-        force: yes
+        update: true
+        force: true
       loop:
-        - { repo: 'https://github.com/circulon/IFDB.bundle.git', name: 'IFDB.bundle' }
-        - { repo: 'https://github.com/ZeroQI/YouTube-Agent.bundle.git', name: 'YouTube-Agent.bundle' }
+        - repo: "https://github.com/circulon/IFDB.bundle.git"
+          name: "IFDB.bundle"
+        - repo: "https://github.com/ZeroQI/YouTube-Agent.bundle.git"
+          name: "YouTube-Agent.bundle"
+      become: true
       become_user: "{{ apps_user }}"
       when: plex_prefs.stat.exists
       notify: Restart Plex
@@ -290,15 +293,19 @@
         attribute: "{{ item.key }}"
         value: "{{ item.value }}"
       loop:
-        - { key: 'FriendlyName', value: 'chill-penguin' }
-        - { key: 'LanNetworksBandwidth', value: '192.168.1.0/255.255.255.0,172.16.0.0/255.240.0.0' }
-        - { key: 'customConnections', value: 'http://192.168.200.127:32400' }
-        - { key: 'allowedNetworks', value: '192.168.1.0/255.255.255.0,172.16.0.0/255.240.0.0' }
+        - key: "FriendlyName"
+          value: "chill-penguin"
+        - key: "LanNetworksBandwidth"
+          value: "192.168.1.0/255.255.255.0,172.16.0.0/255.240.0.0"
+        - key: "customConnections"
+          value: "http://192.168.200.135:32400"
+        - key: "allowedNetworks"
+          value: "192.168.1.0/255.255.255.0,172.16.0.0/255.240.0.0"
       when: plex_prefs.stat.exists
       notify: Restart Plex
 
     - name: Check if *Arr config.xml exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ config_dir }}/{{ item }}/config.xml"
       register: arr_configs
       loop:
@@ -310,13 +317,13 @@
       community.general.xml:
         path: "{{ config_dir }}/{{ item.item }}/config.xml"
         xpath: /Config/AuthenticationMethod
-        value: 'External'
+        value: "External"
       loop: "{{ arr_configs.results }}"
       when: item.stat.exists
       notify: Restart Arr Services
 
     - name: Check if sabnzbd.ini exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ config_dir }}/sabnzbd/sabnzbd.ini"
       register: sabnzbd_ini
 
@@ -326,16 +333,17 @@
         section: misc
         option: host_whitelist
         value: "{{ sabnzbd_host_whitelist }}"
+        mode: "0644"
       when: sabnzbd_ini.stat.exists and sabnzbd_host_whitelist != ''
       notify: Restart Docker Compose
 
     - name: Deploy SABnzbd scripts
-      template:
+      ansible.builtin.template:
         src: "sabnzbd/scripts/{{ item }}.j2"
         dest: "{{ config_dir }}/sabnzbd/scripts/{{ item }}"
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
-        mode: '0755'
+        mode: "0755"
       loop:
         - clean.py
         - replace_for.py
@@ -343,50 +351,56 @@
 
   handlers:
     - name: Restart Docker Compose
-      shell: docker compose down && docker compose up -d
+      ansible.builtin.command: docker compose down && docker compose up -d
       args:
         chdir: "{{ install_dir }}"
+      changed_when: true
       tags: [restart]
 
     - name: Restart MariaDB
-      shell: docker compose restart mariadb
+      ansible.builtin.command: docker compose restart mariadb
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
       tags: [restart]
 
     - name: Restart Homepage
-      shell: docker compose restart homepage
+      ansible.builtin.command: docker compose restart homepage
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
       tags: [restart]
 
     - name: Restart Plex
-      shell: docker compose restart plex
+      ansible.builtin.command: docker compose restart plex
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
       tags: [restart]
 
     - name: Restart Arr Services
-      shell: docker compose restart prowlarr sonarr radarr bazarr
+      ansible.builtin.command: docker compose restart prowlarr sonarr radarr bazarr
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
       tags: [restart]
 
     - name: Restart Home Assistant
-      shell: docker compose restart homeassistant
+      ansible.builtin.command: docker compose restart homeassistant
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
       tags: [restart]
 
     - name: Restart Plex Auto Languages
-      shell: docker compose restart plex-auto-languages
+      ansible.builtin.command: docker compose restart plex-auto-languages
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
       tags: [restart]
-      

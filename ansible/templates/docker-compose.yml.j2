@@ -488,6 +488,29 @@ services:
     networks:
       - ghostship_net
 
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+    volumes:
+      - ${CONFIG_DIR}/syncthing:/config
+      - type: volume
+        source: share
+        target: /library
+        volume:
+          subpath: Library
+    ports:
+      - 8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    networks:
+      - ghostship_net
+
   zerobyte:
     image: ghcr.io/nicotsx/zerobyte:latest
     container_name: zerobyte

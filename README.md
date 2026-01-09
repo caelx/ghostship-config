@@ -339,6 +339,8 @@ The following services are configured and managed by the Ansible playbook:
 
 - **Zerobyte**: Backup automation tool.
 
+- **Syncthing**: Continuous file synchronization program.
+
 - **Booklore**: Self-hosted, multi-user ebook manager.
 
 - **Manyfold**: Self-hosted digital asset manager for 3D print files (Solo version).

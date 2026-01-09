@@ -136,6 +136,7 @@
         - "{{ config_dir }}/convertx"
         - "{{ config_dir }}/arcane"
         - "{{ config_dir }}/activepieces"
+        - "{{ config_dir }}/syncthing"
         - "{{ config_dir }}/zerobyte"
 
     - name: Create Muximux web directories with 775 permissions
@@ -184,7 +185,7 @@
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
         mode: "0644"
-      notify: Restart Docker Compose
+      notify: Restart Muximux
 
     - name: Deploy RomM config
       ansible.builtin.template:
@@ -193,7 +194,7 @@
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
         mode: "0644"
-      notify: Restart Docker Compose
+      notify: Restart RomM
 
     - name: Deploy Recyclarr config
       ansible.builtin.template:
@@ -202,7 +203,7 @@
         owner: "{{ apps_user }}"
         group: "{{ apps_user }}"
         mode: "0644"
-      notify: Restart Docker Compose
+      notify: Restart Recyclarr
 
     - name: Deploy Plex Auto Languages config
       ansible.builtin.template:
@@ -335,7 +336,7 @@
         value: "{{ sabnzbd_host_whitelist }}"
         mode: "0644"
       when: sabnzbd_ini.stat.exists and sabnzbd_host_whitelist != ''
-      notify: Restart Docker Compose
+      notify: Restart SABnzbd
 
     - name: Deploy SABnzbd scripts
       ansible.builtin.template:
@@ -347,7 +348,7 @@
       loop:
         - clean.py
         - replace_for.py
-      notify: Restart Docker Compose
+      notify: Restart SABnzbd
 
   handlers:
     - name: Restart Docker Compose
@@ -399,6 +400,38 @@
 
     - name: Restart Plex Auto Languages
       ansible.builtin.command: docker compose restart plex-auto-languages
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
+      tags: [restart]
+
+    - name: Restart Muximux
+      ansible.builtin.command: docker compose restart muximux
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
+      tags: [restart]
+
+    - name: Restart RomM
+      ansible.builtin.command: docker compose restart romm
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
+      tags: [restart]
+
+    - name: Restart Recyclarr
+      ansible.builtin.command: docker compose restart recyclarr
+      args:
+        chdir: "{{ install_dir }}"
+      when: not (env_deploy.changed or compose_deploy.changed)
+      changed_when: true
+      tags: [restart]
+
+    - name: Restart SABnzbd
+      ansible.builtin.command: docker compose restart sabnzbd
       args:
         chdir: "{{ install_dir }}"
       when: not (env_deploy.changed or compose_deploy.changed)

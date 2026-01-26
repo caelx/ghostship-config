@@ -4,7 +4,7 @@
 - [x] Task: Define environment variables for PriceGhost [3cd250f]
     - [ ] Add PostgreSQL credentials and JWT secret to the environment template (`.env.j2`)
     - [ ] Update `README.md` with descriptions for all new environment variables
-- [ ] Task: Configure dedicated PostgreSQL container
+- [x] Task: Configure dedicated PostgreSQL container [2018510]
     - [ ] Create persistent data directory configuration in Ansible
     - [ ] Add the `postgres-priceghost` service definition to `docker-compose.yml.j2`
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Environment and Database Setup' (Protocol in workflow.md)

@@ -30,6 +30,8 @@ manyfold_secret_key: "{{ lookup('env', 'MANYFOLD_SECRET_KEY') | default(lookup('
 warracker_db_password: "{{ lookup('env', 'WARRACKER_DB_PASSWORD') | default(lookup('password', playbook_dir ~ '/.secrets/warracker_db_password length=32 chars=ascii_letters,digits'), true) }}"
 warracker_secret_key: "{{ lookup('env', 'WARRACKER_SECRET_KEY') | default(lookup('password', playbook_dir ~ '/.secrets/warracker_secret_key length=64 chars=ascii_letters,digits'), true) }}"
 activepieces_frontend_url: "{{ lookup('env', 'ACTIVEPIECES_FRONTEND_URL') | default('https://activepieces.ghostship.io/', true) }}"
+priceghost_db_password: "{{ lookup('env', 'PRICEGHOST_DB_PASSWORD') | default(lookup('password', playbook_dir ~ '/.secrets/priceghost_db_password length=32 chars=ascii_letters,digits'), true) }}"
+priceghost_jwt_secret: "{{ lookup('env', 'PRICEGHOST_JWT_SECRET') | default(lookup('password', playbook_dir ~ '/.secrets/priceghost_jwt_secret length=32 chars=ascii_letters,digits'), true) }}"
 apps_user: apps
 config_dir: "/home/apps/config"
 install_dir: "/home/apps"

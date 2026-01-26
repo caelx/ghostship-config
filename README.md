@@ -323,6 +323,8 @@ The following services are configured and managed by the Ansible playbook:
 
 - **IT-Tools**: Handy online tools for developers.
 
+- **PriceGhost**: Self-hosted price tracking application (`priceghost-frontend:3000`).
+
 - **Warracker**: Self-hosted warranty tracking application.
 
 - **RomM**: Retro ROM manager and browser.

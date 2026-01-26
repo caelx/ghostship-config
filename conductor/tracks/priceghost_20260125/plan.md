@@ -10,7 +10,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Environment and Database Setup' (Protocol in workflow.md) [checkpoint: 810319c]
 
 ## Phase 2: PriceGhost Service Deployment
-- [ ] Task: Configure PriceGhost Backend
+- [x] Task: Configure PriceGhost Backend [6d168d6]
     - [ ] Add the `priceghost-backend` service to `docker-compose.yml.j2`
     - [ ] Map necessary environment variables (`DATABASE_URL`, `JWT_SECRET`)
 - [ ] Task: Configure PriceGhost Frontend

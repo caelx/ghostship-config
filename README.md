@@ -260,6 +260,10 @@ This playbook installs and configures Docker on the Asahi Linux server. It also 
     # Activepieces Configuration (Optional)
     export ACTIVEPIECES_FRONTEND_URL="https://activepieces.ghostship.io/"
 
+    # PriceGhost Configuration
+    export PRICEGHOST_DB_PASSWORD="your_secure_db_password"
+    export PRICEGHOST_JWT_SECRET="your_secure_jwt_secret"
+
     ```
 
 2.  Run the playbook from the project root:

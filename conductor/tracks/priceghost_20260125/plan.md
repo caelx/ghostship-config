@@ -19,13 +19,13 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: PriceGhost Service Deployment' (Protocol in workflow.md) [checkpoint: e554bda]
 
 ## Phase 3: Dashboard and Network Integration
-- [ ] Task: Expose via Cloudflared
+- [x] Task: Expose via Cloudflared [e07839e]
     - [ ] Update Cloudflared configuration to route traffic to the PriceGhost frontend
-- [ ] Task: Integrate with Muximux
+- [x] Task: Integrate with Muximux [e07839e]
     - [ ] Update the Muximux portal configuration template (`muximux/settings.ini.php.j2`)
-- [ ] Task: Integrate with Homepage
+- [x] Task: Integrate with Homepage [e07839e]
     - [ ] Update the Homepage services configuration (`homepage/services.yaml.j2`) with a PriceGhost widget
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Dashboard and Network Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Dashboard and Network Integration' (Protocol in workflow.md) [checkpoint: e07839e]
 
 ## Phase 4: Final Verification
 - [ ] Task: Execute System-Wide Dry Run

@@ -13,7 +13,7 @@
 - [x] Task: Configure PriceGhost Backend [6d168d6]
     - [ ] Add the `priceghost-backend` service to `docker-compose.yml.j2`
     - [ ] Map necessary environment variables (`DATABASE_URL`, `JWT_SECRET`)
-- [ ] Task: Configure PriceGhost Frontend
+- [x] Task: Configure PriceGhost Frontend [6afba78]
     - [ ] Add the `priceghost-frontend` service to `docker-compose.yml.j2`
     - [ ] Ensure correct internal networking between frontend and backend
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: PriceGhost Service Deployment' (Protocol in workflow.md)

@@ -724,9 +724,9 @@ services:
     networks:
       - ghostship_net
 
-  priceghost-frontend:
+  priceghost:
     build: ./priceghost-src/frontend
-    container_name: priceghost-frontend
+    container_name: priceghost
     restart: always
     user: "{{ apps_uid }}:{{ apps_gid }}"
     environment:

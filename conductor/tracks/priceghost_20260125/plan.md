@@ -7,7 +7,7 @@
 - [x] Task: Configure dedicated PostgreSQL container [2018510]
     - [ ] Create persistent data directory configuration in Ansible
     - [ ] Add the `postgres-priceghost` service definition to `docker-compose.yml.j2`
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Environment and Database Setup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Environment and Database Setup' (Protocol in workflow.md) [checkpoint: 810319c]
 
 ## Phase 2: PriceGhost Service Deployment
 - [ ] Task: Configure PriceGhost Backend

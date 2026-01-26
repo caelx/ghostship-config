@@ -16,7 +16,7 @@
 - [x] Task: Configure PriceGhost Frontend [6afba78]
     - [ ] Add the `priceghost-frontend` service to `docker-compose.yml.j2`
     - [ ] Ensure correct internal networking between frontend and backend
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: PriceGhost Service Deployment' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: PriceGhost Service Deployment' (Protocol in workflow.md) [checkpoint: e554bda]
 
 ## Phase 3: Dashboard and Network Integration
 - [ ] Task: Expose via Cloudflared

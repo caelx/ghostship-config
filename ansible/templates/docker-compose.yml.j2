@@ -708,6 +708,22 @@ services:
     networks:
       - ghostship_net
 
+  priceghost-backend:
+    image: ghcr.io/clucraft/priceghost-backend:latest
+    container_name: priceghost-backend
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - DATABASE_URL=postgresql://priceghost:${PRICEGHOST_DB_PASSWORD}@priceghost-db:5432/priceghost
+      - JWT_SECRET=${PRICEGHOST_JWT_SECRET}
+      - PORT=3001
+      - NODE_ENV=production
+    depends_on:
+      priceghost-db:
+        condition: service_healthy
+    networks:
+      - ghostship_net
+
 networks:
   ghostship_net:
     driver: bridge

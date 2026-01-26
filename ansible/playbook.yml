@@ -169,6 +169,17 @@
       notify: Restart Docker Compose
       register: env_deploy
 
+    - name: Clone PriceGhost repository
+      ansible.builtin.git:
+        repo: "https://github.com/clucraft/PriceGhost.git"
+        dest: "{{ install_dir }}/priceghost-src"
+        version: main
+        update: true
+        force: true
+      become: true
+      become_user: "{{ apps_user }}"
+      notify: Restart Docker Compose
+
     - name: Deploy docker-compose.yml
       ansible.builtin.template:
         src: docker-compose.yml.j2

@@ -709,7 +709,7 @@ services:
       - ghostship_net
 
   priceghost-backend:
-    image: ghcr.io/clucraft/priceghost-backend:latest
+    build: ./priceghost-src/backend
     container_name: priceghost-backend
     restart: always
     user: "{{ apps_uid }}:{{ apps_gid }}"
@@ -725,7 +725,7 @@ services:
       - ghostship_net
 
   priceghost-frontend:
-    image: ghcr.io/clucraft/priceghost-frontend:latest
+    build: ./priceghost-src/frontend
     container_name: priceghost-frontend
     restart: always
     user: "{{ apps_uid }}:{{ apps_gid }}"

@@ -687,6 +687,27 @@ services:
     networks:
       - ghostship_net
 
+  priceghost-db:
+    image: postgres:16-alpine
+    container_name: priceghost-db
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - POSTGRES_DB=priceghost
+      - POSTGRES_USER=priceghost
+      - POSTGRES_PASSWORD=${PRICEGHOST_DB_PASSWORD}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ${CONFIG_DIR}/priceghost-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ghostship_net
+
 networks:
   ghostship_net:
     driver: bridge

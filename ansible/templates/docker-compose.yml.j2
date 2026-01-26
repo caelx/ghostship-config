@@ -96,6 +96,28 @@ services:
       gluetun:
         condition: service_healthy
 
+  rtorrent-flood:
+    image: jesec/rtorrent-flood:latest
+    container_name: rtorrent-flood
+    restart: always
+    environment:
+      - PUID={{ apps_uid }}
+      - PGID={{ apps_gid }}
+      - TZ=UTC
+      - FLOOD_OPTION_RUNDIR=/data
+      - WEBUI_PORT={{ rtorrent_flood_port }}
+    volumes:
+      - ${CONFIG_DIR}/rtorrent-flood:/config
+      - type: volume
+        source: share
+        target: /downloads
+        volume:
+          subpath: Downloads
+    network_mode: service:gluetun
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
@@ -729,8 +751,7 @@ services:
     build: ./priceghost-src/frontend
     container_name: priceghost
     restart: always
-    environment:
-      - PORT=3000
+    # This container listens on port 3000 by default.
     depends_on:
       - priceghost-backend
     networks:

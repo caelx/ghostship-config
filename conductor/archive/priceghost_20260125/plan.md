@@ -28,6 +28,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Dashboard and Network Integration' (Protocol in workflow.md) [checkpoint: e07839e]
 
 ## Phase 4: Final Verification
-- [~] Task: Execute System-Wide Dry Run
-    - [ ] Run the Ansible playbook in check mode to verify all templates and configurations
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Final Verification' (Protocol in workflow.md)
+- [x] Task: Fix `priceghost` frontend port documentation
+- [x] Task: Execute System-Wide Dry Run
+    - [x] Run the Ansible playbook in check mode to verify all templates and configurations
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Final Verification' (Protocol in workflow.md) [checkpoint: MANUAL]

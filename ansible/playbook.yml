@@ -139,6 +139,7 @@
         - "{{ config_dir }}/syncthing"
         - "{{ config_dir }}/zerobyte"
         - "{{ config_dir }}/priceghost-db"
+        - "{{ config_dir }}/rtorrent-flood"
 
     - name: Create Muximux web directories with 775 permissions
       ansible.builtin.file:

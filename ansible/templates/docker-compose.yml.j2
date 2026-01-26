@@ -712,7 +712,6 @@ services:
     build: ./priceghost-src/backend
     container_name: priceghost-backend
     restart: always
-    user: "{{ apps_uid }}:{{ apps_gid }}"
     environment:
       - DATABASE_URL=postgresql://priceghost:${PRICEGHOST_DB_PASSWORD}@priceghost-db:5432/priceghost
       - JWT_SECRET=${PRICEGHOST_JWT_SECRET}
@@ -722,13 +721,14 @@ services:
       priceghost-db:
         condition: service_healthy
     networks:
-      - ghostship_net
+      ghostship_net:
+        aliases:
+          - backend
 
   priceghost:
     build: ./priceghost-src/frontend
     container_name: priceghost
     restart: always
-    user: "{{ apps_uid }}:{{ apps_gid }}"
     environment:
       - PORT=3000
     depends_on:

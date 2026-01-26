@@ -724,6 +724,18 @@ services:
     networks:
       - ghostship_net
 
+  priceghost-frontend:
+    image: ghcr.io/clucraft/priceghost-frontend:latest
+    container_name: priceghost-frontend
+    restart: always
+    user: "{{ apps_uid }}:{{ apps_gid }}"
+    environment:
+      - PORT=3000
+    depends_on:
+      - priceghost-backend
+    networks:
+      - ghostship_net
+
 networks:
   ghostship_net:
     driver: bridge
